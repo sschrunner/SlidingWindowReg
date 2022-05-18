@@ -15,10 +15,10 @@ get_kernel <- function(param, mixture = NULL, type = "single"){
   }
   rownames(comb_kernel) <- paste0("kernel", 1:nrow(param))
 
-  if(type == "single"){
+  if(type == "single" | type == "single_only"){
     return(comb_kernel)
   }
-  else if(type == "single_weighted"){
+  else if(type == "single_weighted" | type == "single_weighted_only"){
     return(mixture[-1] * comb_kernel)
   }
   else if(type == "combined"){
@@ -34,6 +34,12 @@ get_kernel <- function(param, mixture = NULL, type = "single"){
 
 #' @title Plot kernel
 #' @description plot cumulated kernel
+#' @examples
+#' param <- cbind(
+#'   delta = c(1,4),
+#'   kernel_rad = c(1,3))
+#' mixture <- rep(1,ncol(param) + 1)
+#' plot_kernel(param = param, mixture = mixture)
 #' @import ggplot2
 #' @export
 plot_kernel <- function(param, mixture = NULL, type = "single"){
@@ -48,11 +54,27 @@ plot_kernel <- function(param, mixture = NULL, type = "single"){
       geom_line(size = 1)+
       geom_point() +
       scale_color_brewer(palette = "Dark2") +
-      facet_grid(type~.)
+      facet_grid(type~.)+
+      theme_bw()+
+      theme(text = element_text(size = 25))
+  }
+  else if(type %in% c("single_only", "single_weighted_only")){
+    d <- data.frame(t = -(ncol(comb_kernel)-1) : 0,
+                    x = as.vector(t(comb_kernel)),
+                    component = ordered(rep(1:nrow(comb_kernel), each = ncol(comb_kernel))))
+    ggplot(subset(d, x > 0),
+           aes(x = t, y = x, color = component, group_by = component)) +
+      geom_line(size = 1)+
+      geom_point() +
+      scale_color_brewer(palette = "Dark2")+
+      theme_bw()+
+      theme(text = element_text(size = 25))
   }
   else{
     ggplot(data.frame(t = -(ncol(comb_kernel)-1) : 0, x = comb_kernel),
            aes(x = t, y = x)) +
-      geom_line(size = 1)
+      geom_line(size = 1)+
+      theme_bw()+
+      theme(text = element_text(size = 25))
   }
 }

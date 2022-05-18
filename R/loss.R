@@ -6,7 +6,7 @@ rmse <- function(prediction, reference){
     stop("Error in RMSE: prediction and reference must be vectors of the same length")
   }
   diff <- na.omit(prediction - reference)
-  return(sqrt(t(diff) %*% diff))
+  return(sqrt(t(diff) %*% diff / length(diff)))
 }
 
 #' @title L0 Error
