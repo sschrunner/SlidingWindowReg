@@ -1,6 +1,6 @@
-#' @title Convolve time series with kernel
+#' @title Convolve time series with discrete kernel
 #' @description convolves the time series with a given kernel
-convolve_window <- function(ts, kernel, delta){
+convolve_window_disc <- function(ts, kernel, delta){
   ts_length <- length(ts)
   kernel_size <- length(kernel)
   if(kernel_size %% 2 != 1){
@@ -19,8 +19,8 @@ convolve_window <- function(ts, kernel, delta){
 }
 
 #' @title Create Gaussian kernel
-#' @description creates a Guassian-shaped kernel (vector)
-gauss_kernel <- function(kernel_rad, sd = NULL, truncation = 0){
+#' @description creates a discrete Gaussian-shaped kernel (vector)
+gauss_kernel_disc <- function(kernel_rad, sd = NULL, truncation = 0){
   x <- seq(-kernel_rad, kernel_rad)
   sd = ifelse(kernel_rad == 0, 1, kernel_rad / 3)
   kernel <- dnorm(x, mean = 0, sd = sd)
@@ -41,11 +41,45 @@ gauss_kernel <- function(kernel_rad, sd = NULL, truncation = 0){
   return(kernel)
 }
 
+#' @title Convolve time series with contiuous kernel
+#' @description convolves the time series with a given kernel
+convolve_window_cont <- function(ts, kernel){
+  ts_length <- length(ts)
+  kernel_length <- length(kernel)
+
+  res <- rep(0, ts_length)
+  for(i in (kernel_length) : ts_length){
+    res[i] <- sum(kernel * ts[(i - kernel_length + 1) : i])
+  }
+
+  return(res)
+}
+
+#' @title Create Gaussian kernel
+#' @description creates a continuous Guassian-shaped kernel (vector)
+gauss_kernel_cont <- function(delta, sigma){
+  # delta, sigma continuous
+  kernel_rad <- 3*sigma
+  kernel_ind <- c(-ceiling(delta + kernel_rad),
+                  min(-floor(delta - kernel_rad), 0))
+
+  x <- seq(kernel_ind[1], 0)
+  bins <- seq(kernel_ind[1] - 0.5, kernel_ind[2] + 0.5)
+  kernel <- diff(pnorm(bins, mean = -delta, sd = sigma))
+  kernel <- c(kernel, rep(0, length(x) - length(kernel)))
+  names(kernel) <- x
+
+  kernel <- kernel / sum(kernel, na.rm = TRUE)
+
+  return(kernel)
+}
+
 #' @title Convolve time series with Gaussian kernel
 #' @description convolves the time series with a Gaussian kernel
 convolve_window_gaussian <- function(ts, param){
-  kernel <- gauss_kernel(kernel_rad = param[2], truncation = max(c(param[2] - param[1], 0))) # 2-parameter version: length = +/- 3 sigma
-  return(convolve_window(ts, kernel, param[1]))
+  #kernel <- gauss_kernel(kernel_rad = param[2], truncation = max(c(param[2] - param[1], 0))) # 2-parameter version: length = +/- 3 sigma
+  kernel <- gauss_kernel_cont(delta = param[1], sigma = param[2])
+  return(convolve_window_cont(ts, kernel))
 }
 
 #' @title Predict target variable

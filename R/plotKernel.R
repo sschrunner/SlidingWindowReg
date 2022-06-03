@@ -11,7 +11,7 @@ get_kernel <- function(param, mixture = NULL, type = "single"){
 
     comb_kernel[i,(kernel_length - delta - kernel_rad) : min(kernel_length - delta + kernel_rad, kernel_length)] <-
       comb_kernel[i,(kernel_length - delta - kernel_rad) : min(kernel_length - delta + kernel_rad, kernel_length)] +
-      gauss_kernel(kernel_rad, truncation = max(c(delta - kernel_rad, 0)))[1:min(2 * kernel_rad + 1,kernel_rad + delta + 1)]
+      gauss_kernel_cont(delta, kernel_rad)[1:min(2 * kernel_rad + 1,kernel_rad + delta + 1)] # , truncation = max(c(delta - kernel_rad, 0)))
   }
   rownames(comb_kernel) <- paste0("kernel", 1:nrow(param))
 
