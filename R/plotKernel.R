@@ -1,80 +1,103 @@
-#' @title Return kernel
-#' @description return cumulated kernel
+#' @title Return and plot accumulated kernel
+#' @description Return and plot the accumulated kernel, consisting of one or multiple windows
+#' @inheritParams predict
+#' @param type a String indicating whether (a) all single windows (option: "single"), or (b) the combined kernel (option "combined")
+#' @param weighted if TRUE, windows are weighted with mix parameters; default: TRUE
+#' @examples
+#' param <- cbind(
+#'   delta = c(0, 10),
+#'   sigma = c(2, 3))
+#' mix <- rep(1, ncol(param) + 1)
+#' get_kernel(param = param, mix = mix)
+#' plot_kernel(param = param, mix = mix)
 #' @export
-get_kernel <- function(param, mixture = NULL, type = "single"){
-  kernel_length <- max(param[,1] + param[,2] + 1)
-  comb_kernel <- matrix(rep(0, kernel_length), nrow = nrow(param), ncol = kernel_length)
+get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
 
-  for(i in 1:nrow(param)){
-    delta = param[i,1]
-    kernel_rad = param[i,2]
-
-    comb_kernel[i,(kernel_length - delta - kernel_rad) : min(kernel_length - delta + kernel_rad, kernel_length)] <-
-      comb_kernel[i,(kernel_length - delta - kernel_rad) : min(kernel_length - delta + kernel_rad, kernel_length)] +
-      gauss_kernel_cont(delta, kernel_rad)[1:min(2 * kernel_rad + 1,kernel_rad + delta + 1)] # , truncation = max(c(delta - kernel_rad, 0)))
+  if(!is.matrix(param) || ncol(param) != 2){
+    stop("Error in get_kernel: param must be a matrix with 2 columns")
   }
-  rownames(comb_kernel) <- paste0("kernel", 1:nrow(param))
-
-  if(type == "single" | type == "single_only"){
-    return(comb_kernel)
-  }
-  else if(type == "single_weighted" | type == "single_weighted_only"){
-    return(mixture[-1] * comb_kernel)
-  }
-  else if(type == "combined"){
-    return(colSums(comb_kernel))
-  }
-  else if(type == "combined_weighted"){
-    if(is.null(mixture)){
-      stop("Mixture must be specified")
+  if(weighted) {
+    if(is.null(mix)){
+      # set mix to default
+      mix <- rep(1, nrow(param) + 1)
+      warning("No weights provided in get_kernel, set to 1")
+    } else if(!is.vector(mix) || length(mix) != (nrow(param) + 1)){
+      stop("Error in get_kernel: provided parameters are not consistent")
     }
-    return(as.vector(t(mixture[-1]) %*% comb_kernel))
+  } else{
+    mix <- rep(1, nrow(param) + 1)
+  }
+
+  # compute kernels
+  kernels <- apply(param, 1, build_gaussian_kernel, simplify = FALSE)
+
+  # compute kernel length and initialize combined kernel
+  kernel_length <- ifelse(length(kernels) > 0, max(sapply(kernels, length)), 0)
+  kernels <- lapply(kernels, function(x){return(c(rep(0, kernel_length - length(x)), x))})
+  kernels <- do.call(rbind, kernels)
+
+  # modify rownames
+  if(!is.null(kernels)){
+    rownames(kernels) <- paste0("kernel", 1:nrow(kernels))
+    colnames(kernels) <- (- (kernel_length - 1)) : 0
+  }
+  else{
+    return(numeric(0))
+  }
+
+  # return according to type
+  if(type == "single"){
+    return(kernels * mix[-1])
+  } else if(type == "combined"){
+    return(mix[-1] %*% kernels)
+  }
+  else{
+    stop("Error in get_kernel: unknown type")
   }
 }
 
-#' @title Plot kernel
-#' @description plot cumulated kernel
-#' @examples
-#' param <- cbind(
-#'   delta = c(1,4),
-#'   kernel_rad = c(1,3))
-#' mixture <- rep(1,ncol(param) + 1)
-#' plot_kernel(param = param, mixture = mixture)
+#' @title Plot accumulated kernel
+#' @rdname get_kernel
 #' @import ggplot2
 #' @export
-plot_kernel <- function(param, mixture = NULL, type = "single"){
-  comb_kernel <- get_kernel(param, mixture, type)
-  if(type %in% c("single", "single_weighted")){
-    d <- data.frame(t = -(ncol(comb_kernel)-1) : 0,
-                    x = c(colSums(comb_kernel), as.vector(t(comb_kernel))),
-                    component = ordered(rep(c("all",1:nrow(comb_kernel)), each = ncol(comb_kernel))),
-                    type = factor(c(rep("combined", ncol(comb_kernel)), rep("component", length(comb_kernel))), levels = c("component","combined")))
-    ggplot(subset(d, x > 0),
-           aes(x = t, y = x, color = component, group_by = component)) +
-      geom_line(size = 1)+
-      geom_point() +
-      scale_color_brewer(palette = "Dark2") +
-      facet_grid(type~.)+
-      theme_bw()+
-      theme(text = element_text(size = 25))
+plot_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
+
+  # get kernel
+  kernel <- get_kernel(param, mix, type, weighted)
+  if(length(kernel) == 0){
+    warning("Cannot plot model with 0 windows - returning empty plot")
+    return(ggplot())
   }
-  else if(type %in% c("single_only", "single_weighted_only")){
-    d <- data.frame(t = -(ncol(comb_kernel)-1) : 0,
-                    x = as.vector(t(comb_kernel)),
-                    component = ordered(rep(1:nrow(comb_kernel), each = ncol(comb_kernel))))
-    ggplot(subset(d, x > 0),
-           aes(x = t, y = x, color = component, group_by = component)) +
-      geom_line(size = 1)+
-      geom_point() +
-      scale_color_brewer(palette = "Dark2")+
-      theme_bw()+
-      theme(text = element_text(size = 25))
+
+  # create data.frame
+  d <- data.frame(
+      x = as.vector(t(kernel)),
+      time = -(ncol(kernel) - 1) : 0,
+      window = ordered(rep(1:nrow(kernel), each = ncol(kernel)))
+    )
+
+  if(type == "single"){
+    p <- ggplot(d,
+           aes(x = time,
+               y = x,
+               color = window,
+               group_by = window)) +
+         scale_color_brewer(palette = "Dark2")
+  } else if(type == "combined"){
+    p <- ggplot(d,
+            aes(x = time,
+                y = x))
   }
-  else{
-    ggplot(data.frame(t = -(ncol(comb_kernel)-1) : 0, x = comb_kernel),
-           aes(x = t, y = x)) +
-      geom_line(size = 1)+
-      theme_bw()+
-      theme(text = element_text(size = 25))
-  }
+
+  # add formatting instructions
+  p <- p +
+    geom_point() +
+    geom_line(size = 1) +
+    theme_bw() +
+    theme(text = element_text(size = 25),
+          legend.position = "top") +
+    geom_vline(xintercept = -param[,1],
+               linetype = "dashed")
+
+  return(p)
 }

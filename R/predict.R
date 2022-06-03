@@ -1,53 +1,14 @@
-#' @title Convolve time series with discrete kernel
-#' @description convolves the time series with a given kernel
-convolve_window_disc <- function(ts, kernel, delta){
-  ts_length <- length(ts)
-  kernel_size <- length(kernel)
-  if(kernel_size %% 2 != 1){
-    stop("kernel must have odd length")
-  }
-  kernel_radius <- (kernel_size - 1) / 2
-  kernel_sum <- sum(kernel)
+#' Convolve time series with a given kernel
+convolve_window <- function(ts, kernel){
 
-  offset <- kernel_radius + delta
-  res <- rep(0, ts_length)
-  for(i in (kernel_radius+1) : (ts_length - delta)){
-    res[i + delta] <- sum(kernel * ts[(i-kernel_radius) : (i+kernel_radius)])
-  }
-
-  return(res)
-}
-
-#' @title Create Gaussian kernel
-#' @description creates a discrete Gaussian-shaped kernel (vector)
-gauss_kernel_disc <- function(kernel_rad, sd = NULL, truncation = 0){
-  x <- seq(-kernel_rad, kernel_rad)
-  sd = ifelse(kernel_rad == 0, 1, kernel_rad / 3)
-  kernel <- dnorm(x, mean = 0, sd = sd)
-
-  # truncation: used to truncate kernel, if delta is smaller than kernel_rad
-  if(truncation > 0){
-    if(truncation > (length(kernel)-1)){
-      stop("truncation larger than kernel size!")
-    }
-    else if(truncation > kernel_rad){
-      warning("large truncation!")
-    }
-    kernel[(length(kernel) - truncation + 1) : length(kernel)] <- 0
-  }
-
-  kernel <- kernel / sum(kernel, na.rm = TRUE)
-
-  return(kernel)
-}
-
-#' @title Convolve time series with contiuous kernel
-#' @description convolves the time series with a given kernel
-convolve_window_cont <- function(ts, kernel){
+  # compute lengths of ts and kernel
   ts_length <- length(ts)
   kernel_length <- length(kernel)
 
+  # initialize prediction with 0
   res <- rep(0, ts_length)
+
+  # convolve kernel
   for(i in (kernel_length) : ts_length){
     res[i] <- sum(kernel * ts[(i - kernel_length + 1) : i])
   }
@@ -55,38 +16,62 @@ convolve_window_cont <- function(ts, kernel){
   return(res)
 }
 
-#' @title Create Gaussian kernel
-#' @description creates a continuous Guassian-shaped kernel (vector)
-gauss_kernel_cont <- function(delta, sigma){
-  # delta, sigma continuous
-  kernel_rad <- 3*sigma
-  kernel_ind <- c(-ceiling(delta + kernel_rad),
-                  min(-floor(delta - kernel_rad), 0))
+#' Create Gaussian kernel
+build_gaussian_kernel <- function(param){
 
+  delta <- param[1]
+  sigma <- param[2]
+
+  # define kernel radius by 3*sigma
+  kernel_rad <- 3 * sigma
+
+  # define minimum / maximum index by delta +/- 3*sigma (rounded)
+  kernel_ind <- c(- ceiling(delta + kernel_rad),
+                  min(- floor(delta - kernel_rad), 0))
+
+  # initialize kernel values with 0 and define bins
   x <- seq(kernel_ind[1], 0)
   bins <- seq(kernel_ind[1] - 0.5, kernel_ind[2] + 0.5)
-  kernel <- diff(pnorm(bins, mean = -delta, sd = sigma))
+
+  # compute kernel values for window by integrating over Gaussian distribution in each bin
+  kernel <- diff(pnorm(bins, mean = - delta, sd = sigma))
   kernel <- c(kernel, rep(0, length(x) - length(kernel)))
   names(kernel) <- x
 
+  # scale kernel (if truncated)
   kernel <- kernel / sum(kernel, na.rm = TRUE)
 
   return(kernel)
 }
 
-#' @title Convolve time series with Gaussian kernel
-#' @description convolves the time series with a Gaussian kernel
-convolve_window_gaussian <- function(ts, param){
-  #kernel <- gauss_kernel(kernel_rad = param[2], truncation = max(c(param[2] - param[1], 0))) # 2-parameter version: length = +/- 3 sigma
-  kernel <- gauss_kernel_cont(delta = param[1], sigma = param[2])
-  return(convolve_window_cont(ts, kernel))
-}
-
 #' @title Predict target variable
 #' @description predicts the target variable given a time series of inputs, and trained parameters
+#' @param ts a vector or ts object
+#' @param mix a vector of mixing parameters (beta)
+#' @param param a matrix with 2 columns representing one window per row. The first column contains location parameters delta, the second column contains the standard deviation sigma.
 #' @export
 predict <- function(ts, mix, param){
+  if(!is.vector(ts)){
+    stop("Error in predict: ts must be a vector")
+  }
+  if(!is.vector(mix) || !is.matrix(param) || length(mix) != (nrow(param) + 1)){
+    stop("Error in predict: provided parameters are not consistent")
+  }
+
+  # compute offset and convolution for each window
   offset <- mix[1]
-  conv <- apply(param, 1, convolve_window_gaussian, ts = ts)
-  return(offset + as.vector(conv %*% mix[-1]))
+  if(nrow(param) > 0){
+    conv <- apply(param,
+                  1,
+                  function(x, ts){
+                    kernel <- build_gaussian_kernel(x)
+                    return(convolve_window(ts, kernel))
+                  },
+                  ts = ts)
+    res <- offset + as.vector(conv %*% mix[-1])
+  }
+  else{
+    res <- rep(offset, length(ts))
+  }
+  return(res)
 }
