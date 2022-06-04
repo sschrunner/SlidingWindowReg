@@ -21,7 +21,7 @@ decodeParam <- function(x){
 
 #' performs continuous optimization with respect to mixing and window parameters
 #' @import nloptr
-train_both <- function(ts_input, ts_output, mix0, param0, lambda){
+train_both <- function(ts_input, ts_output, mix0, param0, lambda, log){
 
   # specify algorithm (conjugated gradient) and tolerance
   opts <- list("algorithm"="NLOPT_LN_BOBYQA",
@@ -36,7 +36,7 @@ train_both <- function(ts_input, ts_output, mix0, param0, lambda){
       param <- param_list$param
       return(
         nrmse(
-          predict(ts_input, mix, param),
+          predict(ts_input, mix, param, log),
                   ts_output) +
           lambda * sum(abs(mix))
         )},
@@ -48,11 +48,11 @@ train_both <- function(ts_input, ts_output, mix0, param0, lambda){
 }
 
 #' train an elementary model
-train_inc <- function(ts_input, ts_output, iter, lambda){
+train_inc <- function(ts_input, ts_output, iter, lambda, log){
 
   # help function to compute model metrics to store training history
   append_hist <- function(train_hist, mix, param, operation_str){
-    predict(ts_input, mix, param) -> p
+    predict(ts_input, mix, param, log) -> p
     train_hist <- rbind(train_hist,
                         cbind(
                           operation = operation_str,
@@ -85,7 +85,7 @@ train_inc <- function(ts_input, ts_output, iter, lambda){
     lambda0 <- ifelse(i == 1, 0, lambda)
 
     # train parameters
-    p <- train_both(ts_input, ts_output, mix0 = mix, param0 = param, lambda = lambda0)
+    p <- train_both(ts_input, ts_output, mix0 = mix, param0 = param, lambda = lambda0, log = log)
 
     # reshape and update parameters
     param_list <- decodeParam(p)
@@ -127,6 +127,8 @@ train_inc <- function(ts_input, ts_output, iter, lambda){
 #' @param ts_output a vector or ts object (on the same time scale as ts_input) containing the target time series
 #' @param iter number of iterations (maximum number of windows)
 #' @param runs number of independent model runs
+#' @param lambda a non-negative scalar indicating the L1 regulatization parameter
+#' @param log whether a log-linear model should be used
 #' @param parallel should the runs be computed in parallel?
 #' @examples
 #' set.seed(42)
@@ -134,22 +136,26 @@ train_inc <- function(ts_input, ts_output, iter, lambda){
 #' @import pbapply
 #' @import parallel
 #' @export
-train <- function(ts_input, ts_output, iter = 10, runs = 10, lambda = NULL, parallel = TRUE){
+train <- function(ts_input, ts_output, iter = 10, runs = 10, lambda = NULL, log = FALSE, parallel = TRUE){
 
   if(is.null(lambda)){
     lambda = 0.1
   }
 
   if(parallel){
+    # initialize cluster
     n_cores = parallel::detectCores()
     cl <- parallel::makeCluster(n_cores - 1)
-    clusterExport(cl, list("ts_input", "ts_output", "iter", "lambda"), envir = environment())
+    clusterExport(cl, list("ts_input", "ts_output", "log", "iter", "lambda"), envir = environment())
 
-    res <- pbapply::pbreplicate(runs, train_inc(ts_input, ts_output, iter, lambda), cl = cl)
+    # run computation
+    res <- pbapply::pbreplicate(runs, train_inc(ts_input, ts_output, iter, lambda, log), cl = cl)
 
+    # close cluster
     parallel::stopCluster(cl)
   } else {
-    res <- pbapply::pbreplicate(runs, train_inc(ts_input, ts_output, iter, lambda))
+    # run computation
+    res <- pbapply::pbreplicate(runs, train_inc(ts_input, ts_output, iter, lambda, log))
   }
   return(res)
 }

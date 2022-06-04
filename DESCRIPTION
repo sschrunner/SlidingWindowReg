@@ -4,7 +4,7 @@ Title: Sliding Multi-Window Regression
 Version: 0.1.0
 Author: Stefan Schrunner
 Maintainer: Stefan Schrunner <stefan.schrunner@nmbu.no>
-Description: The package implements a multi-window model for time series analysis.
+Description: The package implements a sliding multi-window model for time series analysis.
 License: for internal use only (UBC, NMBU)
 Encoding: UTF-8
 LazyData: true
@@ -14,4 +14,4 @@ Depends:
 Imports:
     ggplot2,
     nloptr,
-    GA
+    hydroGOF

@@ -49,8 +49,9 @@ build_gaussian_kernel <- function(param){
 #' @param ts a vector or ts object
 #' @param mix a vector of mixing parameters (beta)
 #' @param param a matrix with 2 columns representing one window per row. The first column contains location parameters delta, the second column contains the standard deviation sigma.
+#' @param log whether a log-linear model should be used
 #' @export
-predict <- function(ts, mix, param){
+predict <- function(ts, mix, param, log = FALSE){
   if(!is.vector(ts)){
     stop("Error in predict: ts must be a vector")
   }
@@ -68,7 +69,11 @@ predict <- function(ts, mix, param){
                     return(convolve_window(ts, kernel))
                   },
                   ts = ts)
+    if(log){
+      conv <- log(conv)
+    }
     res <- offset + as.vector(conv %*% mix[-1])
+
   }
   else{
     res <- rep(offset, length(ts))

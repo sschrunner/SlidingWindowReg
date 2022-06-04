@@ -8,7 +8,6 @@
 eval_all <- function(prediction, reference){
   res <- data.frame(
     rmse = rmse(prediction, reference),
-    psnr = psnr(prediction, reference),
     r2 = r2(prediction, reference),
     nse = nse(prediction, reference),
     kge = kge(prediction, reference))
