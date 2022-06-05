@@ -1,10 +1,10 @@
-#' help functions to encode parameter set as vector
+# help functions to encode parameter set as vector
 encodeParam <- function(mix, param){
   return(
     c(mix, as.vector(param))
   )
 }
-#' help function to decode parameter set from vector
+# help function to decode parameter set from vector
 decodeParam <- function(x){
   num_win = (length(x) - 1) / 3
   mix = x[1 : (num_win + 1)]
@@ -19,7 +19,7 @@ decodeParam <- function(x){
   )
 }
 
-#' performs continuous optimization with respect to mixing and window parameters
+# performs continuous optimization with respect to mixing and window parameters
 #' @import nloptr
 train_both <- function(ts_input, ts_output, mix0, param0, lambda, log){
 
@@ -47,7 +47,7 @@ train_both <- function(ts_input, ts_output, mix0, param0, lambda, log){
   return(res)
 }
 
-#' train an elementary model
+# train an elementary model
 train_inc <- function(ts_input, ts_output, iter, lambda, log){
 
   # help function to compute model metrics to store training history
@@ -132,7 +132,7 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
 #' @param parallel should the runs be computed in parallel?
 #' @examples
 #' set.seed(42)
-#' train(sampleWatershed$rain, sampleWatershed$gauge, iter = 2, runs = 2)
+#' train(sampleWatershed$rain, sampleWatershed$gauge, iter = 2, runs = 1, parallel = FALSE)
 #' @import pbapply
 #' @import parallel
 #' @export

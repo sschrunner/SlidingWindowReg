@@ -76,6 +76,9 @@ plot_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
       window = ordered(rep(1:nrow(kernel), each = ncol(kernel)))
     )
 
+  # avoid package compilation warning
+  time <- x <- window <- NULL
+
   if(type == "single"){
     p <- ggplot(d,
            aes(x = time,

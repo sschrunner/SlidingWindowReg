@@ -15,6 +15,7 @@ eval_all <- function(prediction, reference){
 }
 
 #' @describeIn eval_all Root Mean Squared Error
+#' @importFrom stats na.omit
 #' @export
 rmse <- function(prediction, reference){
   if(length(prediction) != length(reference)){

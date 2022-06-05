@@ -1,4 +1,4 @@
-#' Convolve time series with a given kernel
+# Convolve time series with a given kernel
 convolve_window <- function(ts, kernel){
 
   # compute lengths of ts and kernel
@@ -16,7 +16,8 @@ convolve_window <- function(ts, kernel){
   return(res)
 }
 
-#' Create Gaussian kernel
+# Create Gaussian kernel
+#' @import stats
 build_gaussian_kernel <- function(param){
 
   delta <- param[1]

@@ -12,6 +12,7 @@
 #' pred <- predict(sampleWatershed$rain, mixture, param)
 #' plot_prediction(pred, sampleWatershed$gauge, sampleWatershed$rain)
 #' @import ggplot2
+#' @importFrom stats na.omit
 #' @export
 plot_prediction <- function(prediction, reference, input_ts = NULL, scale = "year", years = NULL){
 
@@ -64,6 +65,9 @@ plot_prediction <- function(prediction, reference, input_ts = NULL, scale = "yea
       d <- subset(d, year %in% years)
     }
 
+    # avoid package compilation warning
+    day_of_year <- gauge <- type <- year <- NULL
+
     p <- ggplot(d, aes(x = day_of_year, y = gauge, col = type, group_by = type)) +
       facet_grid(category~year, scales = "free_y")+
       xlab("day of hydr. year") +
@@ -75,6 +79,9 @@ plot_prediction <- function(prediction, reference, input_ts = NULL, scale = "yea
     max_month <- max(subset(d, type == "prediction")$month) - 3
     d <- subset(d, month <= 3 | (month > (max_month - 4) & month < max_month))
 
+    # avoid package compilation warning
+    day_of_month <- gauge <- type <- month <- NULL
+
     p <- ggplot(d, aes(x = day_of_month, y = gauge, col = type, group_by = type)) +
       facet_grid(category~month, scales = "free_y") +
       xlab("day of month") +
@@ -85,6 +92,9 @@ plot_prediction <- function(prediction, reference, input_ts = NULL, scale = "yea
     # restrict weeks
     max_week <- max(subset(d, type == "prediction")$week) - 3
     d <- subset(d, week <= 3 | (week > (max_week - 4) & week < max_week))
+
+    # avoid package compilation warning
+    day_of_week <- gauge <- type <- week <- NULL
 
     p <- ggplot(d, aes(x = day_of_week, y = gauge, col = type, group_by = type)) +
       facet_grid(category~week, scales = "free_y") +
