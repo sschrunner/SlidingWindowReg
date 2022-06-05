@@ -4,6 +4,7 @@ encodeParam <- function(mix, param){
     c(mix, as.vector(param))
   )
 }
+
 # help function to decode parameter set from vector
 decodeParam <- function(x){
   num_win = (length(x) - 1) / 3
@@ -116,8 +117,9 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
   return(
     list(mix = mix,
          param = param,
-         hist = train_hist,
-         metrics = train_hist[nrow(train_hist),])
+         lambda = lambda,
+         train_hist = train_hist,
+         train_metrics = train_hist[nrow(train_hist),-1])
     )
 }
 
@@ -126,36 +128,78 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
 #' @param ts_input a vector or ts object containing the input time series
 #' @param ts_output a vector or ts object (on the same time scale as ts_input) containing the target time series
 #' @param iter number of iterations (maximum number of windows)
+#' @param cv_fold number of folds for cross-validation
 #' @param runs number of independent model runs
-#' @param lambda a non-negative scalar indicating the L1 regulatization parameter
+#' @param lambda a non-negative scalar or vector indicating the L1 regularization parameter(s)
 #' @param log whether a log-linear model should be used
 #' @param parallel should the runs be computed in parallel?
 #' @examples
 #' set.seed(42)
-#' train(sampleWatershed$rain, sampleWatershed$gauge, iter = 2, runs = 1, parallel = FALSE)
+#' train(sampleWatershed$rain, sampleWatershed$gauge, iter = 2, cv_fold = 1, runs = 1, parallel = FALSE)
 #' @import pbapply
 #' @import parallel
 #' @export
-train <- function(ts_input, ts_output, iter = 10, runs = 10, lambda = NULL, log = FALSE, parallel = TRUE){
+train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda = 0.1, log = FALSE, parallel = TRUE){
 
-  if(is.null(lambda)){
-    lambda = 0.1
+  if(length(ts_input) != length(ts_output)){
+    stop("Error: input and output must be vectors of the same lengths")
   }
 
+  # split by years for cross-validation and create folds
+  years <- ceiling(length(ts_input) / 365)
+  if(years < cv_fold){
+    warning("Number of years is smaller than cv_fold parameter; setting cv_fold to 1.")
+    cv_fold = 1
+  }
+  cutoff_years <- floor(seq(1, years + 1, length.out = cv_fold + 1))
+  fold_assignment <- rep(1 : cv_fold, 365 * diff(cutoff_years))[1 : length(ts_input)]
+  folds <- sapply(cv_fold : 1, setdiff, x = 1 : cv_fold, simplify = FALSE)
+
+  # create list of runs to perform
+  init_list <- expand.grid(lambda = lambda, fold = 1 : cv_fold, run = 1 : runs)[,c(1,2)]
+
+  # train models
   if(parallel){
     # initialize cluster
     n_cores = parallel::detectCores()
     cl <- parallel::makeCluster(n_cores - 1)
-    clusterExport(cl, list("ts_input", "ts_output", "log", "iter", "lambda"), envir = environment())
+    #clusterExport(cl, list("ts_input", "ts_output", "log", "iter", "lambda"), envir = environment())
+    clusterExport(cl, list("ts_input", "ts_output", "log", "iter"), envir = environment())
+    clusterExport(cl, list("folds", "fold_assignment"), envir = environment())
+
+    # target function
+    eval_fct <- function(x){
+      # obtain training indices
+      train_inds <- fold_assignment %in% folds[[ x["fold"] ]]
+      # train model
+      res <- train_inc(ts_input = ts_input[train_inds],
+                       ts_output = ts_output[train_inds],
+                       iter = iter,
+                       lambda = x["lambda"],
+                       log = log)
+      # compute test metrics
+      test_metrics <- eval_all(predict(ts_input[-train_inds],
+                                       mix = res$mix,
+                                       param = res$param,
+                                       log = log),
+                               ts_output[-train_inds])
+      res$test_metrics <- test_metrics
+      return(res)
+    }
 
     # run computation
-    res <- pbapply::pbreplicate(runs, train_inc(ts_input, ts_output, iter, lambda, log), cl = cl)
+    #res <- pbapply::pbreplicate(runs, train_inc(ts_input, ts_output, iter, lambda, log), cl = cl)
+    res <- pbapply::pbapply(init_list, 1,
+                            eval_fct,
+                            cl = cl)
 
     # close cluster
     parallel::stopCluster(cl)
   } else {
     # run computation
-    res <- pbapply::pbreplicate(runs, train_inc(ts_input, ts_output, iter, lambda, log))
+    #res <- pbapply::pbreplicate(runs, train_inc(ts_input, ts_output, iter, lambda, log))
+    res <- pbapply::pbapply(init_list, 1,
+                            eval_fct)
   }
   return(res)
 }
