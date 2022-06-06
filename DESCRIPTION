@@ -17,4 +17,5 @@ Imports:
     hydroGOF,
     pbapply,
     parallel,
-    stats
+    stats,
+    dplyr

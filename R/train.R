@@ -135,7 +135,12 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
 #' @param parallel should the runs be computed in parallel?
 #' @examples
 #' set.seed(42)
-#' train(sampleWatershed$rain, sampleWatershed$gauge, iter = 2, cv_fold = 1, runs = 1, parallel = FALSE)
+#' train(sampleWatershed$rain,
+#'       sampleWatershed$gauge,
+#'       iter = 2,
+#'       cv_fold = 1,
+#'       runs = 1,
+#'       parallel = FALSE)
 #' @import pbapply
 #' @import parallel
 #' @export
@@ -153,10 +158,40 @@ train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda
   }
   cutoff_years <- floor(seq(1, years + 1, length.out = cv_fold + 1))
   fold_assignment <- rep(1 : cv_fold, 365 * diff(cutoff_years))[1 : length(ts_input)]
-  folds <- sapply(cv_fold : 1, setdiff, x = 1 : cv_fold, simplify = FALSE)
+  if(cv_fold > 1){
+    folds <- lapply(cv_fold : 1, setdiff, x = 1 : cv_fold)
+  } else{
+    folds <- list(1 : cv_fold)
+  }
 
   # create list of runs to perform
-  init_list <- expand.grid(lambda = lambda, fold = 1 : cv_fold, run = 1 : runs)[,c(1,2)]
+  init_list <- expand.grid(run = 1 : runs, fold = 1 : cv_fold, lambda = lambda)[,c(2,3)]
+
+  # target function
+  eval_fct <- function(x){
+    # obtain training indices
+    train_inds <- which(fold_assignment %in% folds[[ x["fold"] ]])
+    # train model
+    res <- train_inc(ts_input = ts_input[train_inds],
+                     ts_output = ts_output[train_inds],
+                     iter = iter,
+                     lambda = c(x["lambda"]),
+                     log = log)
+    # compute test metrics, if cross-validation is performed
+    if(length(train_inds) < length(ts_input)){
+      test_metrics <- eval_all(predict(ts_input[-train_inds],
+                                       mix = res$mix,
+                                       param = res$param,
+                                       log = log),
+                               ts_output[-train_inds])
+
+    } else{
+      test_metrics <- c(rmse = NA)
+    }
+    res$test_metrics <- test_metrics
+
+    return(res)
+  }
 
   # train models
   if(parallel){
@@ -166,26 +201,6 @@ train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda
     #clusterExport(cl, list("ts_input", "ts_output", "log", "iter", "lambda"), envir = environment())
     clusterExport(cl, list("ts_input", "ts_output", "log", "iter"), envir = environment())
     clusterExport(cl, list("folds", "fold_assignment"), envir = environment())
-
-    # target function
-    eval_fct <- function(x){
-      # obtain training indices
-      train_inds <- fold_assignment %in% folds[[ x["fold"] ]]
-      # train model
-      res <- train_inc(ts_input = ts_input[train_inds],
-                       ts_output = ts_output[train_inds],
-                       iter = iter,
-                       lambda = x["lambda"],
-                       log = log)
-      # compute test metrics
-      test_metrics <- eval_all(predict(ts_input[-train_inds],
-                                       mix = res$mix,
-                                       param = res$param,
-                                       log = log),
-                               ts_output[-train_inds])
-      res$test_metrics <- test_metrics
-      return(res)
-    }
 
     # run computation
     #res <- pbapply::pbreplicate(runs, train_inc(ts_input, ts_output, iter, lambda, log), cl = cl)
@@ -201,5 +216,15 @@ train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda
     res <- pbapply::pbapply(init_list, 1,
                             eval_fct)
   }
+
+  # add fold to list objects
+  res <- lapply(1:length(res), function(x){
+    r <- res[[x]]
+    r$fold <- init_list$fold[x]
+    return(r)})
+
+  # reshape as array
+  dim(res) <- c(runs, cv_fold, length(lambda))
+  dimnames(res) <- list(paste("run",1:runs), paste("fold",1:cv_fold), paste0("lambda=",lambda))
   return(res)
 }

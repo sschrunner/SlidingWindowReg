@@ -56,51 +56,137 @@ get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
   }
 }
 
-#' @title Plot accumulated kernel
-#' @rdname get_kernel
-#' @import ggplot2
-#' @export
-plot_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
+# help function to plot kernels
+plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type = "single", weighted = TRUE){
 
-  # get kernel
-  kernel <- get_kernel(param, mix, type, weighted)
-  if(length(kernel) == 0){
-    warning("Cannot plot model with 0 windows - returning empty plot")
-    return(ggplot())
+  if(is.null(colnames)){
+    colnames <- rep(1, length(list))
+  }
+  if(is.null(rownames)){
+    if(is.null(names(list))){
+      rownames <- 1:length(list)
+    }
+    else{
+      rownames <- names(list)
+    }
   }
 
   # create data.frame
-  d <- data.frame(
-      x = as.vector(t(kernel)),
-      time = -(ncol(kernel) - 1) : 0,
-      window = ordered(rep(1:nrow(kernel), each = ncol(kernel)))
-    )
+  d <- data.frame(x = c(),
+                  time = c(),
+                  window = c(),
+                  rownames = c(),
+                  colnames = c(),
+                  lambda = c(),
+                  fold = c())
+
+  for(i in 1:length(list)){
+    # get kernel
+    kernel <- get_kernel(list[[i]]$param, list[[i]]$mix, type, weighted)
+    # produces warning due to removed names
+    suppressWarnings({
+      d <- rbind(
+        d,
+        data.frame(
+          x = as.vector(t(kernel)),
+          time = -(ncol(kernel) - 1) : 0,
+          window = ordered(rep(1:nrow(kernel), each = ncol(kernel))),
+          n_windows = rep(nrow(list[[i]]$param), ncol(kernel) * nrow(kernel)),
+          delta = -rep(list[[i]]$param[,1], each = ncol(kernel)),
+          rownames = rownames[i],
+          colnames = colnames[i],
+          lambda = ifelse(is.null(list[[i]]$lambda), 0, list[[i]]$lambda),
+          fold = ifelse(is.null(list[[i]]$fold), 0, list[[i]]$fold)
+        )
+      )
+    })
+  }
 
   # avoid package compilation warning
-  time <- x <- window <- NULL
+  time <- x <- window <- fold <- lambda <- delta <- n_windows <- NULL
 
   if(type == "single"){
     p <- ggplot(d,
-           aes(x = time,
-               y = x,
-               color = window,
-               group_by = window)) +
-         scale_color_brewer(palette = "Dark2")
+                aes(x = time,
+                    y = x,
+                    color = window,
+                    group_by = window)) +
+      scale_color_brewer(palette = "Dark2")
   } else if(type == "combined"){
     p <- ggplot(d,
-            aes(x = time,
-                y = x))
+                aes(x = time,
+                    y = x))
+  }
+
+  if(length(unique(rownames)) > 1){
+    if(length(unique(colnames)) > 1){
+      p <- p + facet_grid(rownames~colnames)
+    }
+    else{
+      p <- p + facet_grid(rownames~.)
+    }
+  } else{
+    if(length(unique(colnames)) > 1){
+      p <- p + facet_grid(.~colnames)
+    }
   }
 
   # add formatting instructions
   p <- p +
     geom_point() +
     geom_line(size = 1) +
+    geom_text(aes(label = paste0("no. windows = ", n_windows,"\nfold = ", fold, ",\nlambda = ", lambda)),
+              x = min(d$time),
+              y = max(d$x),
+              color = "black",
+              hjust = 0,
+              vjust = 1) +
+    geom_vline(aes(xintercept = delta),
+               linetype = "dotted",
+               color = "black",
+               size = 0.8) +
     theme_bw() +
     theme(text = element_text(size = 25),
-          legend.position = "top") +
-    geom_vline(xintercept = -param[,1],
-               linetype = "dashed")
+          legend.position = "top")
 
   return(p)
+}
+
+
+#' @title Plot accumulated kernel
+#' @rdname get_kernel
+#' @param list a list containing multiple trained SlidingWindowReg models
+#' @import ggplot2
+#' @export
+plot_kernel <- function(list = NULL, param = NULL, mix = NULL, type = "single", weighted = TRUE){
+
+  if(is.null(list)){
+    if(is.null(param)){
+      stop("Either list or param must be specified")
+    } else {
+      list <- list(
+                list(param = param,
+                     mix = mix)
+      )
+    }
+  } else {
+    if(!is.null(param)){
+      warning("Both list and param specified - param will be ignored.")
+    }
+  }
+
+  if(!is.null(dim(list))){
+    rownames <- rep(dimnames(list)[[1]], prod(dim(list)[-1]))
+    colnames <- rep(dimnames(list)[[2]], each = prod(dim(list)[-2]))
+  } else{
+    rownames <- colnames <- NULL
+  }
+
+  return(
+    plot_multiple_kernels(list = list,
+                          colnames = colnames,
+                          rownames = rownames,
+                          type = type,
+                          weighted = weighted)
+  )
 }

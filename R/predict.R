@@ -17,7 +17,7 @@ convolve_window <- function(ts, kernel){
 }
 
 # Create Gaussian kernel
-#' @import stats
+#' @importFrom stats pnorm
 build_gaussian_kernel <- function(param){
 
   delta <- param[1]
