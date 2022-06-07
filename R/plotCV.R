@@ -70,14 +70,14 @@ eval_CV <- function(list){
                                                                         max = max(value, na.rm = TRUE))
 
   # determine runs with best RMSE on training data and create list_best
-  best_rmse_runs <- df %>% group_by(type, lambda, cv_fold) %>% filter(metric == "rmse") %>% filter(value == min(value))
+  best_rmse_runs <- df %>% group_by(type, lambda, cv_fold) %>% filter(metric == "rmse") %>% filter(value == min(value)) %>% arrange(lambda, cv_fold)
   best_rmse_runs_train <- subset(best_rmse_runs, type == "train")[, c("run", "cv_fold", "lambda")]
   list_red <- list[as.matrix(best_rmse_runs_train)]
   dim(list_red) <- dim(list)[c(2,3)]
   dimnames(list_red) <- dimnames(list)[c(2,3)]
 
   # # determine best lambda
-  # best_rmse_lambda = best_rmse_runs %>% group_by(type, lambda) %>% filter(value == min(value) & type == "train")
+  best_rmse_lambda = best_rmse_runs %>% filter(type == "train") %>% group_by(type, lambda) %>%
   # best_model <- unlist(list[as.matrix(best_rmse_lambda[, c("run", "cv_fold", "lambda")])])
 
   return(list(
