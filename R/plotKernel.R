@@ -84,72 +84,80 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
     # get kernel
     kernel <- get_kernel(list[[i]]$param, list[[i]]$mix, type, weighted)
     # produces warning due to removed names
-    suppressWarnings({
-      d <- rbind(
-        d,
-        data.frame(
-          x = as.vector(t(kernel)),
-          time = -(ncol(kernel) - 1) : 0,
-          window = ordered(rep(1:nrow(kernel), each = ncol(kernel))),
-          n_windows = rep(nrow(list[[i]]$param), ncol(kernel) * nrow(kernel)),
-          delta = -rep(list[[i]]$param[,1], each = ncol(kernel)),
-          rownames = rownames[i],
-          colnames = colnames[i],
-          lambda = ifelse(is.null(list[[i]]$lambda), 0, list[[i]]$lambda),
-          fold = ifelse(is.null(list[[i]]$fold), 0, list[[i]]$fold)
+    if(length(kernel) > 0){
+      suppressWarnings({
+        d <- rbind(
+          d,
+          data.frame(
+            x = as.vector(t(kernel)),
+            time = -(ncol(kernel) - 1) : 0,
+            window = ordered(rep(1:nrow(kernel), each = ncol(kernel))),
+            n_windows = rep(nrow(list[[i]]$param), ncol(kernel) * nrow(kernel)),
+            delta = -rep(list[[i]]$param[,1], each = ncol(kernel)),
+            rownames = rownames[i],
+            colnames = colnames[i],
+            lambda = ifelse(is.null(list[[i]]$lambda), 0, list[[i]]$lambda),
+            fold = ifelse(is.null(list[[i]]$fold), 0, list[[i]]$fold)
+          )
         )
-      )
-    })
-  }
-
-  # avoid package compilation warning
-  time <- x <- window <- fold <- lambda <- delta <- n_windows <- NULL
-
-  if(type == "single"){
-    p <- ggplot(d,
-                aes(x = time,
-                    y = x,
-                    color = window,
-                    group_by = window)) +
-      scale_color_brewer(palette = "Dark2")
-  } else if(type == "combined"){
-    p <- ggplot(d,
-                aes(x = time,
-                    y = x))
-  }
-
-  if(length(unique(rownames)) > 1){
-    if(length(unique(colnames)) > 1){
-      p <- p + facet_grid(rownames~colnames)
-    }
-    else{
-      p <- p + facet_grid(rownames~.)
-    }
-  } else{
-    if(length(unique(colnames)) > 1){
-      p <- p + facet_grid(.~colnames)
+      })
     }
   }
 
-  # add formatting instructions
-  p <- p +
-    geom_point() +
-    geom_line(size = 1) +
-    geom_text(aes(label = paste0("no. windows = ", n_windows,"\nfold = ", fold, ",\nlambda = ", lambda)),
-              x = min(d$time),
-              y = max(d$x),
-              color = "black",
-              hjust = 0,
-              vjust = 1) +
-    geom_vline(aes(xintercept = delta),
-               linetype = "dotted",
-               color = "black",
-               size = 0.8) +
-    theme_bw() +
-    theme(text = element_text(size = 25),
-          legend.position = "top")
+  if(nrow(d) > 0){
+    # avoid package compilation warning
+    time <- x <- window <- fold <- lambda <- delta <- n_windows <- NULL
 
-  return(p)
+    if(type == "single"){
+      p <- ggplot(d,
+                  aes(x = time,
+                      y = x,
+                      color = window,
+                      group_by = window)) +
+        scale_color_brewer(palette = "Dark2")
+    } else if(type == "combined"){
+      p <- ggplot(d,
+                  aes(x = time,
+                      y = x))
+    }
+
+    if(length(unique(rownames)) > 1){
+      if(length(unique(colnames)) > 1){
+        p <- p + facet_grid(rownames~colnames)
+      }
+      else{
+        p <- p + facet_grid(rownames~.)
+      }
+    } else{
+      if(length(unique(colnames)) > 1){
+        p <- p + facet_grid(.~colnames)
+      }
+    }
+
+    # add formatting instructions
+    p <- p +
+      geom_point() +
+      geom_line(size = 1) +
+      geom_text(aes(label = paste0("no. windows = ", n_windows,"\nfold = ", fold, ",\nlambda = ", lambda)),
+                x = min(d$time),
+                y = max(d$x),
+                color = "black",
+                hjust = 0,
+                vjust = 1) +
+      geom_vline(aes(xintercept = delta),
+                 linetype = "dotted",
+                 color = "black",
+                 size = 0.8) +
+      theme_bw() +
+      theme(text = element_text(size = 25),
+            legend.position = "top") +
+      xlim(c(-50,0))
+
+    return(p)
+  }
+  else{
+    return(ggplot())
+  }
 }
 
 

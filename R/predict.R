@@ -5,11 +5,16 @@ convolve_window <- function(ts, kernel){
   ts_length <- length(ts)
   kernel_length <- length(kernel)
 
+  if(ts_length < kernel_length){
+    warning("kernel larger than ts, returning NA")
+    return(rep(NA, ts_length))
+  }
+
   # initialize prediction with 0
   res <- rep(0, ts_length)
 
   # convolve kernel
-  for(i in (kernel_length) : ts_length){
+  for(i in kernel_length : ts_length){
     res[i] <- sum(kernel * ts[(i - kernel_length + 1) : i])
   }
 

@@ -55,7 +55,7 @@ eval_CV <- function(list){
   }
 
   # avoid R check errors
-  value <- type <- metric <- cv_fold <- NULL
+  value <- type <- metric <- cv_fold <- train_rmse <- test_rmse <- train_value <- test_value <- mean_train <- NULL
 
   # compute summaries
   summary <- df %>% group_by(type, metric, lambda, cv_fold) %>% summarize(mean = mean(value, na.rm = TRUE),
@@ -70,24 +70,38 @@ eval_CV <- function(list){
                                                                         max = max(value, na.rm = TRUE))
 
   # determine runs with best RMSE on training data and create list_best
-  best_rmse_runs <- df %>% group_by(type, lambda, cv_fold) %>% filter(metric == "rmse") %>% filter(value == min(value)) %>% arrange(lambda, cv_fold)
-  best_rmse_runs_train <- subset(best_rmse_runs, type == "train")[, c("run", "cv_fold", "lambda")]
-  list_red <- list[as.matrix(best_rmse_runs_train)]
+  best_rmse_runs <- df %>% group_by(type, lambda, cv_fold) %>% filter(metric == "rmse") %>% filter(value == min(value)) %>%
+    distinct(type, lambda, cv_fold, value, metric, .keep_all = TRUE) %>% arrange(lambda, cv_fold)
+  best_rmse_run_inds <- subset(best_rmse_runs, type == "train")[, c("run", "cv_fold", "lambda")]
+  list_red <- list[as.matrix(best_rmse_run_inds)]
   dim(list_red) <- dim(list)[c(2,3)]
   dimnames(list_red) <- dimnames(list)[c(2,3)]
 
   # # determine best lambda
-  best_rmse_lambda = best_rmse_runs %>% filter(type == "train") %>% group_by(type, lambda) %>%
-  # best_model <- unlist(list[as.matrix(best_rmse_lambda[, c("run", "cv_fold", "lambda")])])
+  best_rmse_runs %>%
+    mutate(train_rmse = value * (type == "train"), test_rmse = value * (type == "test")) %>%
+    group_by(lambda, cv_fold) %>%
+    summarize(train_value = max(train_rmse), test_value = max(test_rmse)) -> best_rmse_runs_train
+  best_rmse_runs_train %>%
+    group_by(lambda) %>%
+    summarize(mean_train = mean(train_value),
+              mean_test = mean(test_value),
+              var_train = var(train_value),
+              var_test = var(test_value)) -> best_runs_mean_rmse
+  best_runs_mean_rmse %>%
+    filter(mean_train == min(mean_train)) -> best_lambda
+
+
 
   return(list(
     full = df,
     summary = summary,
     lambda_summary = lambda_summary,
     best_rmse_runs = best_rmse_runs,
-    # best_rmse_lambda = best_rmse_lambda,
-    list_best = list_red
-    # best_model = list
+    list_best = list_red,
+    best_runs_mean_rmse = best_runs_mean_rmse,
+    best_lambda = best_lambda,
+    best_model = list_red[,best_lambda$lambda]
     )
   )
 }

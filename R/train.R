@@ -74,6 +74,8 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
   # stop if (a) maximum number of iterations is reached, or (b) a window is cancelled out
   while(i <= iter & all(mix[-1] > 0)){
 
+
+    # print("INIT")
     # initialize and add new window parameters (delta = 0 for first window, random otherwise)
     new_param <- cbind(
       ifelse(i == 1, 0, sample(setdiff(0:255, param[,1]), size = 1)),
@@ -82,11 +84,19 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
     param <- rbind(param, new_param)
     mix <- c(mix, ifelse(i == 1, 1, 0))
 
+    # print("BEFORE")
+    # print(param)
+    # print(mix)
+
     # set lambda to 0 for first window (no regularization)
     lambda0 <- ifelse(i == 1, 0, lambda)
 
     # train parameters
     p <- train_both(ts_input, ts_output, mix0 = mix, param0 = param, lambda = lambda0, log = log)
+
+    # print("AFTER")
+    # print(param)
+    # print(mix)
 
     # reshape and update parameters
     param_list <- decodeParam(p)
@@ -100,8 +110,14 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
       mix[-1] <- (mix[-1])[o]
     }
 
+    # print("LAST")
+    # print(param)
+    # print(mix)
+
     # add history entry
     train_hist <- append_hist(train_hist, mix, param, paste("iteration", i))
+
+    # print("HERE")
 
     # increment counter
     i <- i+1
@@ -113,7 +129,6 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
     mix <- mix[- (rm_win + 1)]
     param <- param[- rm_win, , drop = FALSE]
   }
-
   return(
     list(mix = mix,
          param = param,
@@ -132,7 +147,8 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
 #' @param runs number of independent model runs
 #' @param lambda a non-negative scalar or vector indicating the L1 regularization parameter(s)
 #' @param log whether a log-linear model should be used
-#' @param parallel should the runs be computed in parallel?
+#' @param parallel should the runs be computed in parallel? If FALSE, all runs are computed in serial. If TRUE, all runs are computed in parallel with a maximum number of cores. If a scalar is provided, the number of cores is set manually.
+#' @param return either "best" (best model run is returned), or "all" (all model runs are returned)
 #' @examples
 #' set.seed(42)
 #' train(sampleWatershed$rain,
@@ -144,10 +160,14 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
 #' @import pbapply
 #' @import parallel
 #' @export
-train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda = 0.1, log = FALSE, parallel = TRUE){
+train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda = 0.1, log = FALSE, parallel = TRUE, return = "best"){
 
   if(length(ts_input) != length(ts_output)){
     stop("Error: input and output must be vectors of the same lengths")
+  }
+
+  if(!(return %in% c("best", "all"))){
+    return = "best"
   }
 
   # split by years for cross-validation and create folds
@@ -169,6 +189,9 @@ train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda
 
   # target function
   eval_fct <- function(x){
+    # print(paste0("fold: ", x["fold"]))
+    # print(paste0("lambda: ", x["lambda"]))
+
     # obtain training indices
     train_inds <- which(fold_assignment %in% folds[[ x["fold"] ]])
     # train model
@@ -177,13 +200,24 @@ train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda
                      iter = iter,
                      lambda = c(x["lambda"]),
                      log = log)
+    # print(res)
+    # print(paste("train-set:", length(train_inds)))
+    # print(paste("ts-input:", length(ts_input)))
     # compute test metrics, if cross-validation is performed
-    if(length(train_inds) < length(ts_input)){
-      test_metrics <- eval_all(predict(ts_input[-train_inds],
-                                       mix = res$mix,
-                                       param = res$param,
-                                       log = log),
-                               ts_output[-train_inds])
+    if(all(res$param[,1] + 3 * res$param[,2] < (length(ts_input) - length(train_inds)))){
+      pred <- predict(ts_input[-train_inds],
+                      mix = res$mix,
+                      param = res$param,
+                      log = log)
+      if(length(unique(na.omit(pred))) > 0 && length(unique(na.omit(train_inds))) > 0){
+        test_metrics <- eval_all(predict(ts_input[-train_inds],
+                                         mix = res$mix,
+                                         param = res$param,
+                                         log = log),
+                                 ts_output[-train_inds])
+      } else{
+        test_metrics <- c(rmse = NA)
+      }
 
     } else{
       test_metrics <- c(rmse = NA)
@@ -194,9 +228,14 @@ train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda
   }
 
   # train models
-  if(parallel){
+  if(parallel != FALSE){
     # initialize cluster
-    n_cores = parallel::detectCores()
+    if(parallel == TRUE){
+      n_cores = parallel::detectCores()
+    }
+    else{
+      n_cores = parallel
+    }
     cl <- parallel::makeCluster(n_cores - 1)
     #clusterExport(cl, list("ts_input", "ts_output", "log", "iter", "lambda"), envir = environment())
     clusterExport(cl, list("ts_input", "ts_output", "log", "iter"), envir = environment())
@@ -226,5 +265,13 @@ train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda
   # reshape as array
   dim(res) <- c(runs, cv_fold, length(lambda))
   dimnames(res) <- list(paste("run",1:runs), paste("fold",1:cv_fold), paste0("lambda=",lambda))
-  return(res)
+
+  if(return == "all"){
+    return(res)
+  }
+  else{
+    rmse <- apply(res, c(1,2,3), function(x){return(x[[1]]$train_metrics$rmse)})
+    best_rmse <- which(rmse == min(rmse, na.rm = TRUE))
+    return(res[best_rmse])
+  }
 }
