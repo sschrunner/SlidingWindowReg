@@ -49,7 +49,7 @@ train_both <- function(ts_input, ts_output, mix0, param0, lambda, log){
 }
 
 # train an elementary model
-train_inc <- function(ts_input, ts_output, iter, lambda, log){
+train_inc <- function(ts_input, ts_output, iter, lambda, log, improvement_thres = 0){
 
   # help function to compute model metrics to store training history
   append_hist <- function(train_hist, mix, param, operation_str){
@@ -70,10 +70,10 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
 
   # iteration counter
   i = 1
+  stop = FALSE
 
   # stop if (a) maximum number of iterations is reached, or (b) a window is cancelled out
-  while(i <= iter & all(mix[-1] > 0)){
-
+  while(!stop){
 
     # print("INIT")
     # initialize and add new window parameters (delta = 0 for first window, random otherwise)
@@ -118,6 +118,17 @@ train_inc <- function(ts_input, ts_output, iter, lambda, log){
     train_hist <- append_hist(train_hist, mix, param, paste("iteration", i))
 
     # print("HERE")
+
+    # evaluate stopping criteria
+    stop <- (stop | (i >= iter)) # stop if max iteration counter is reached
+    stop <- (stop | any(mix[-1] == 0)) # stop if any coefficient is 0 # ACTIVATE AGAIN IF NEEDED
+
+    # stop if gain in RMSE is low
+    if(i > 1){ # ACTIVATE AGAIN IF NEEDED
+      rmse_prior <- train_hist[nrow(train_hist) - 1, "rmse"]
+      rmse_current <- train_hist[nrow(train_hist), "rmse"]
+      stop <- (stop | ((1 - rmse_current / rmse_prior) < improvement_thres)) # test if significant improvement
+    }
 
     # increment counter
     i <- i+1
@@ -260,6 +271,8 @@ train <- function(ts_input, ts_output, iter = 10, cv_fold = 5, runs = 10, lambda
   res <- lapply(1:length(res), function(x){
     r <- res[[x]]
     r$fold <- init_list$fold[x]
+    r$fitted <- predict(ts_input, r$mix, r$param)
+    r$residuals <- ts_input - r$fitted
     return(r)})
 
   # reshape as array

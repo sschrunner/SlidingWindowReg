@@ -60,3 +60,44 @@ kge <- function(prediction, reference){
   }
   return(KGE(prediction, reference))
 }
+
+#' @describeIn eval_all difference in number of windows
+#' @export
+diff_num_win <- function(model, reference_no){
+  return(length(model$mix) - reference_no)
+}
+
+#' @describeIn kernel overlap
+#' @export
+overlap <- function(param_prediction, param_reference){
+  k1 <- get_kernel(param_prediction, type = "combined") / nrow(param_prediction)
+  k2 <- get_kernel(param_reference, type = "combined") / nrow(param_reference)
+
+  len_diff <- length(k1) - length(k2)
+  if(len_diff > 0){
+    k2 <- c(rep(0, len_diff), k2)
+  } else if(len_diff < 0){
+    k1 <- c(rep(0, -len_diff), k1)
+  }
+
+  k <- rbind(k1, k2)
+
+  return(sum(apply(k, 2, min)))
+}
+
+#' @describeIn MAD of window coefficients
+#' @export
+mad_window_coeff <- function(beta_prediction, beta_reference){
+  n_pred <- length(beta_prediction)
+  n_ref <- length(beta_reference)
+
+  if(n_pred > n_ref){
+    beta_reference <- c(beta_reference, rep(0, n_pred - n_ref))
+  }
+  else if(n_pred < n_ref){
+    beta_prediction <- c(beta_prediction, rep(0, n_ref - n_pred))
+  }
+
+  return(sum(abs(beta_prediction - beta_reference)))
+}
+
