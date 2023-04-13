@@ -29,7 +29,7 @@ build_gaussian_kernel <- function(param){
   sigma <- param[2]
 
   # define kernel radius by 3*sigma
-  kernel_rad <- 3 * sigma
+  kernel_rad <- max(3 * sigma, 1)
 
   # define minimum / maximum index by delta +/- 3*sigma (rounded)
   kernel_ind <- c(- ceiling(delta + kernel_rad),
@@ -61,12 +61,12 @@ predict <- function(ts, mix, param, log = FALSE){
   if(!is.vector(ts)){
     stop("Error in predict: ts must be a vector")
   }
-  if(!is.vector(mix) || !is.matrix(param) || length(mix) != (nrow(param) + 1)){
+  if(!is.vector(mix) || !is.matrix(param) || length(mix) != nrow(param)){ # VERSION WITH INTERCEPT: nrow(param) + 1
     stop("Error in predict: provided parameters are not consistent")
   }
 
   # compute offset and convolution for each window
-  offset <- mix[1]
+  #offset <- mix[1] #VERSION WITH INTERCEPT
   if(nrow(param) > 0){
     conv <- apply(param,
                   1,
@@ -78,7 +78,7 @@ predict <- function(ts, mix, param, log = FALSE){
     if(log){
       conv <- log(conv)
     }
-    res <- offset + as.vector(conv %*% mix[-1])
+    res <- as.vector(conv %*% mix) # VERSION WITH INTERCEPT: offset + ... mix[-1]
 
   }
   else{

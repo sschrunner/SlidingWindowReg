@@ -8,7 +8,7 @@
 #' param <- cbind(
 #'   delta = c(0, 10),
 #'   sigma = c(2, 3))
-#' mixture <- rep(1, ncol(param) + 1)
+#' mixture <- rep(1, ncol(param)) # VERSION WITHOUT INTERCEPT: ncol(param) + 1
 #' pred <- predict(sampleWatershed$rain, mixture, param)
 #' plot_prediction(pred, sampleWatershed$gauge, sampleWatershed$rain)
 #' @import ggplot2
@@ -19,7 +19,7 @@ plot_prediction <- function(prediction, reference, input_ts = NULL, scale = "yea
   # create data.frame
   d <- data.frame(t = 1:length(prediction),
                   gauge = c(prediction, reference),
-                  type = rep(c("prediction", "reference"), each = length(prediction)),
+                  type = rep(c("prediction", "ground truth"), each = length(prediction)),
                   category = "gauge",
                   year = rep(1 : (length(prediction) / 365), each = 365)[1:length(prediction)],
                   day_of_year = (1:length(prediction)) %% 365,
@@ -48,7 +48,7 @@ plot_prediction <- function(prediction, reference, input_ts = NULL, scale = "yea
   d$day_of_year[d$day_of_year == 0] <- 365
   d$day_of_month[d$day_of_month == 0] <- 30
   d$day_of_week[d$day_of_week == 0] <- 7
-  d$type <- factor(d$type, levels = c("prediction", "reference", "input"))
+  d$type <- factor(d$type, levels = c("ground truth", "prediction", "input"))
 
   # omit NA values
   d <- na.omit(d)
@@ -69,7 +69,7 @@ plot_prediction <- function(prediction, reference, input_ts = NULL, scale = "yea
     day_of_year <- gauge <- type <- year <- NULL
 
     p <- ggplot(d, aes(x = day_of_year, y = gauge, col = type, group_by = type)) +
-      facet_grid(category~year, scales = "free_y")+
+      facet_grid(type~year, scales = "free_y")+
       xlab("day of hydr. year") +
       scale_x_continuous(breaks=c(50, 150, 250, 350))
 

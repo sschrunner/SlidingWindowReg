@@ -19,13 +19,13 @@ get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
   if(weighted) {
     if(is.null(mix)){
       # set mix to default
-      mix <- rep(1, nrow(param) + 1)
+      mix <- rep(1, nrow(param))# VERSION WITH INTERCEPT: rep(1, nrow(param) + 1)
       warning("No weights provided in get_kernel, set to 1")
-    } else if(!is.vector(mix) || length(mix) != (nrow(param) + 1)){
+    } else if(!is.vector(mix) || length(mix) != (nrow(param))){# VERSION WITH INTERCEPT: nrow(param) + 1
       stop("Error in get_kernel: provided parameters are not consistent")
     }
   } else{
-    mix <- rep(1, nrow(param) + 1)
+    mix <- rep(1, nrow(param))# VERSION WITH INTERCEPT: rep(1, nrow(param) + 1)
   }
 
   # compute kernels
@@ -47,9 +47,9 @@ get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
 
   # return according to type
   if(type == "single"){
-    return(kernels * mix[-1])
+    return(kernels * mix) # VERSION WITH INTERCEPT: mix[-1]
   } else if(type == "combined"){
-    return(mix[-1] %*% kernels)
+    return(mix %*% kernels)# VERSION WITH INTERCEPT: mix[-1]
   }
   else{
     stop("Error in get_kernel: unknown type")
@@ -57,10 +57,14 @@ get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
 }
 
 # help function to plot kernels
-plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type = "single", weighted = TRUE){
+plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type = "single", weighted = TRUE,
+                                  xlim = NULL, include_text = TRUE){
 
   if(is.null(colnames)){
     colnames <- rep(1, length(list))
+  }
+  else{
+    colnames <- colnames
   }
   if(is.null(rownames)){
     if(is.null(names(list))){
@@ -69,6 +73,12 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
     else{
       rownames <- names(list)
     }
+  }
+  rownames <- factor(rownames, levels = unique(rownames))
+  colnames <- factor(colnames, levels = unique(colnames))
+
+  if(is.null(xlim)){
+    xlim <- c(-50,0)
   }
 
   # create data.frame
@@ -112,9 +122,9 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
       p <- ggplot(d,
                   aes(x = time,
                       y = x,
-                      color = window,
-                      group_by = window)) +
-        scale_color_brewer(palette = "Dark2")
+                      #color = window,
+                      group_by = window)) #+
+       # scale_color_brewer(palette = "Dark2")
     } else if(type == "combined"){
       p <- ggplot(d,
                   aes(x = time,
@@ -138,20 +148,24 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
     p <- p +
       geom_point() +
       geom_line(size = 1) +
-      geom_text(aes(label = paste0("no. windows = ", n_windows,"\nfold = ", fold, ",\nlambda = ", lambda)),
-                x = min(d$time),
-                y = max(d$x),
-                color = "black",
-                hjust = 0,
-                vjust = 1) +
       geom_vline(aes(xintercept = delta),
                  linetype = "dotted",
                  color = "black",
                  size = 0.8) +
       theme_bw() +
-      theme(text = element_text(size = 25),
-            legend.position = "top") +
-      xlim(c(-50,0))
+      theme(text = element_text(size = 20),
+            legend.position = "bottom") +
+      xlim(xlim)
+
+    if(include_text){
+      p <- p +
+        geom_text(aes(label = paste0("no. windows = ", n_windows,"\nfold = ", fold, ",\nlambda = ", lambda)),
+                  x = min(d$time),
+                  y = max(d$x),
+                  color = "black",
+                  hjust = 0,
+                  vjust = 1)
+    }
 
     return(p)
   }
@@ -166,7 +180,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
 #' @param list a list containing multiple trained SlidingWindowReg models
 #' @import ggplot2
 #' @export
-plot_kernel <- function(list = NULL, param = NULL, mix = NULL, type = "single", weighted = TRUE){
+plot_kernel <- function(list = NULL, param = NULL, mix = NULL, type = "single", weighted = TRUE, xlim = NULL, include_text = TRUE){
 
   if(is.null(list)){
     if(is.null(param)){
@@ -195,6 +209,8 @@ plot_kernel <- function(list = NULL, param = NULL, mix = NULL, type = "single", 
                           colnames = colnames,
                           rownames = rownames,
                           type = type,
-                          weighted = weighted)
+                          weighted = weighted,
+                          xlim = xlim,
+                          include_text = include_text)
   )
 }
