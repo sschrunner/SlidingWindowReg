@@ -7,7 +7,7 @@
 #' param <- cbind(
 #'   delta = c(0, 10),
 #'   sigma = c(2, 3))
-#' mix <- rep(1, ncol(param) + 1)
+#' mix <- rep(1, ncol(param))
 #' get_kernel(param = param, mix = mix)
 #' plot_kernel(param = param, mix = mix)
 #' @export
@@ -20,7 +20,6 @@ get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
     if(is.null(mix)){
       # set mix to default
       mix <- rep(1, nrow(param))# VERSION WITH INTERCEPT: rep(1, nrow(param) + 1)
-      warning("No weights provided in get_kernel, set to 1")
     } else if(!is.vector(mix) || length(mix) != (nrow(param))){# VERSION WITH INTERCEPT: nrow(param) + 1
       stop("Error in get_kernel: provided parameters are not consistent")
     }
@@ -86,9 +85,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
                   time = c(),
                   window = c(),
                   rownames = c(),
-                  colnames = c(),
-                  lambda = c(),
-                  fold = c())
+                  colnames = c())
 
   for(i in 1:length(list)){
     # get kernel
@@ -105,9 +102,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
             n_windows = rep(nrow(list[[i]]$param), ncol(kernel) * nrow(kernel)),
             delta = -rep(list[[i]]$param[,1], each = ncol(kernel)),
             rownames = rownames[i],
-            colnames = colnames[i],
-            lambda = ifelse(is.null(list[[i]]$lambda), 0, list[[i]]$lambda),
-            fold = ifelse(is.null(list[[i]]$fold), 0, list[[i]]$fold)
+            colnames = colnames[i]
           )
         )
       })
@@ -116,15 +111,15 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
 
   if(nrow(d) > 0){
     # avoid package compilation warning
-    time <- x <- window <- fold <- lambda <- delta <- n_windows <- NULL
+    time <- x <- window <- delta <- n_windows <- NULL
 
     if(type == "single"){
       p <- ggplot(d,
                   aes(x = time,
                       y = x,
-                      #color = window,
-                      group_by = window)) #+
-       # scale_color_brewer(palette = "Dark2")
+                      color = window,
+                      group_by = window)) +
+        scale_color_brewer(palette = "Dark2")
     } else if(type == "combined"){
       p <- ggplot(d,
                   aes(x = time,
@@ -159,7 +154,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
 
     if(include_text){
       p <- p +
-        geom_text(aes(label = paste0("no. windows = ", n_windows,"\nfold = ", fold, ",\nlambda = ", lambda)),
+        geom_text(aes(label = paste0("no. windows = ", n_windows)),
                   x = min(d$time),
                   y = max(d$x),
                   color = "black",
@@ -178,6 +173,8 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
 #' @title Plot accumulated kernel
 #' @rdname get_kernel
 #' @param list a list containing multiple trained SlidingWindowReg models
+#' @param xlim vector with lower / upper bound of the x axis to print the kernel
+#' @param include_text if TRUE, plots will be annotated
 #' @import ggplot2
 #' @export
 plot_kernel <- function(list = NULL, param = NULL, mix = NULL, type = "single", weighted = TRUE, xlim = NULL, include_text = TRUE){

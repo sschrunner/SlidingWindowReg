@@ -25,6 +25,10 @@ convolve_window <- function(ts, kernel){
 #' @importFrom stats pnorm
 build_gaussian_kernel <- function(param){
 
+  if(any(is.na(param))){
+    return(0)
+  }
+
   delta <- param[1]
   sigma <- param[2]
 
@@ -82,7 +86,7 @@ predict <- function(ts, mix, param, log = FALSE){
 
   }
   else{
-    res <- rep(offset, length(ts))
+    res <- rep(0, length(ts))
   }
   return(res)
 }
