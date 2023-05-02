@@ -1,11 +1,13 @@
-# help functions to encode parameter set as vector
+#' @describeIn train Encode parameter vector
 encodeParam <- function(mix, param){
   return(
     c(mix, as.vector(param))
   )
 }
 
-# help function to decode parameter set from vector
+#' @describeIn train Decode parameter vector
+#' @param x encoded parameter vector
+#' @param intercept if TRUE, a model with intercept is used
 decodeParam <- function(x, intercept = FALSE){
   num_win = ifelse(intercept, (length(x) - 1), length(x)) / 3
   num_mix = ifelse(intercept, num_win + 1, num_win)
@@ -21,12 +23,13 @@ decodeParam <- function(x, intercept = FALSE){
   )
 }
 
-# help function to evaluate model error
+#' @describeIn train Evaluate model error
 error <- function(ts_input, ts_output, param, mix, log){
     return(rmse(predict(ts_input, mix, param, log), ts_output)
   )
 }
 
+#' @describeIn train Core training process
 #' @import nloptr
 #' @import dplyr
 train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bic"){

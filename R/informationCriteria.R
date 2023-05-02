@@ -18,6 +18,7 @@ BIC <- function(prediction, reference, model){
   return(-2 * lik + log(length(reference)) * (length(model$mix) + length(model$param)))
 }
 
+#' @describeIn AIC log-likelihood function
 #' @importFrom stats var
 loglik <- function(prediction, reference){
   resid <- reference - prediction

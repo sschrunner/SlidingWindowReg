@@ -2,10 +2,21 @@
 % Please edit documentation in R/plotKernel.R
 \name{get_kernel}
 \alias{get_kernel}
+\alias{plot_multiple_kernels}
 \alias{plot_kernel}
 \title{Return and plot accumulated kernel}
 \usage{
 get_kernel(param, mix = NULL, type = "single", weighted = TRUE)
+
+plot_multiple_kernels(
+  list,
+  colnames = NULL,
+  rownames = NULL,
+  type = "single",
+  weighted = TRUE,
+  xlim = NULL,
+  include_text = TRUE
+)
 
 plot_kernel(
   list = NULL,
@@ -27,6 +38,10 @@ plot_kernel(
 \item{weighted}{if TRUE, windows are weighted with mix parameters; default: TRUE}
 
 \item{list}{a list containing multiple trained SlidingWindowReg models}
+
+\item{colnames}{a vector of column names}
+
+\item{rownames}{a vector of row names}
 
 \item{xlim}{vector with lower / upper bound of the x axis to print the kernel}
 

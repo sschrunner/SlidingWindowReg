@@ -1,4 +1,5 @@
-# Convolve time series with a given kernel
+#' @describeIn predict Convolve the time series with the window kernel
+#' @param kernel a window kernel
 convolve_window <- function(ts, kernel){
 
   # compute lengths of ts and kernel
@@ -21,7 +22,7 @@ convolve_window <- function(ts, kernel){
   return(res)
 }
 
-# Create Gaussian kernel
+#' @describeIn predict Build a Gaussian window kernel
 #' @importFrom stats pnorm
 build_gaussian_kernel <- function(param){
 

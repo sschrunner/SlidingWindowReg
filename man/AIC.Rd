@@ -3,11 +3,14 @@
 \name{AIC}
 \alias{AIC}
 \alias{BIC}
+\alias{loglik}
 \title{Information Criteria}
 \usage{
 AIC(prediction, reference, model)
 
 BIC(prediction, reference, model)
+
+loglik(prediction, reference)
 }
 \arguments{
 \item{prediction}{a vector or ts object of predicted values}
@@ -27,5 +30,7 @@ Computes Akaike's Information Criterion (AIC) and Bayesian Information Criterion
 \item \code{AIC()}: Akaike's Information Criterion
 
 \item \code{BIC()}: Bayesian Information Criterion
+
+\item \code{loglik()}: log-likelihood function
 
 }}

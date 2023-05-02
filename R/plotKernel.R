@@ -55,7 +55,10 @@ get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
   }
 }
 
-# help function to plot kernels
+#' @rdname get_kernel
+#' @param colnames a vector of column names
+#' @param rownames a vector of row names
+#' @inheritParams plot_kernel
 plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type = "single", weighted = TRUE,
                                   xlim = NULL, include_text = TRUE){
 
