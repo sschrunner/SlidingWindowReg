@@ -1,8 +1,12 @@
 ---
-title: "Sample experiment"
+title: "Sample experiment using Sliding Window Regression"
 author: "Stefan Schrunner"
 date: '2023-05-01'
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Sample Experiment}
+  %\VignetteEncoding{UTF-8}
 ---
 
 # Introduction
@@ -55,9 +59,9 @@ pred_on_test <- SlidingWindowReg::predict(sampleWatershed$rain[-train_inds],
 print(rmse(pred_on_test, sampleWatershed$gauge[-train_inds]))
 ```
 
-As a next step, we use 'ggplot2' to generate a plot demonstrating (a) the input time series, (b) the predicted output time series, and (c) the ground truth output.
+As a next step, we generate a plot demonstrating (a) the input time series, (b) the predicted output time series, and (c) the ground truth output.
 
-```{r evaluate_plot, width = 12, height = 8}
+```{r evaluate_plot, width = 20, height = 12}
 plot_prediction(pred_on_test,
                 sampleWatershed$gauge[-train_inds],
                 sampleWatershed$rain[-train_inds])
@@ -80,7 +84,7 @@ print(mod$mix)
 
 In order to visualize the estimated windows, a kernel plot is available in <tt>SlidingWindowReg</tt>:
 
-```{r evaluate_param_plot, warning = FALSE}
+```{r evaluate_param_plot, warning = FALSE, width = 12, height = 8}
 plot_kernel(param = mod$param, 
             mix = mod$mix,
             include_text = FALSE)
