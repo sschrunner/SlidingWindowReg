@@ -1,0 +1,87 @@
+---
+title: "Sample experiment"
+author: "Stefan Schrunner"
+date: '2023-05-01'
+output: html_document
+---
+
+# Introduction
+
+<tt>SlidingWindowReg</tt> is an R package, which implements a regression model for hydrological time series data. In particular, temporal windows are used to extract features from the time series by convolution with a Gaussian kernel. Then, each extracted feature is mapped to a target time series by a multiple linear regression model.
+
+In this vignette, a sample experiment is performed to demonstrate that the package is able to reconstruct model parameters correctly.
+
+## Data preparation \& experimental setup
+
+First, we load the package and the sample watershed data:
+
+```{r loading, message = FALSE}
+library(SlidingWindowReg)
+
+data("sampleWatershed")
+```
+
+As a second step, we divide the dataset into (a) a train set containing 30 years (75\% of the time series) and (b) a test set comprising the residual 10 years (25\% of the time series)
+
+```{r splits}
+train_inds <- 1 : (nrow(sampleWatershed) * 0.75)
+```
+
+## Run model
+
+Given the data splits, we train the SlidingWindowReg model on the train set. For this purpose, the following parameters are used:
+
+* <tt>iter</tt> number of iterations (maximum number of windows)
+* <tt>runs</tt> number of independent model runs
+* <tt>param\_selection</tt> method to determine the number of windows
+
+```{r execute}
+mod <- SlidingWindowReg::train(sampleWatershed$rain[train_inds],
+                               sampleWatershed$gauge[train_inds],
+                               iter = 3,
+                               runs = 1,
+                               param_selection = "best_bic")[[1]]
+```
+
+# Evaluation
+
+In a first evaluation, we investigate the performance of the model on the test set. For this purpose, we compute the root mean squared error (RMSE):
+
+```{r evaluate_rmse}
+pred_on_test <- SlidingWindowReg::predict(sampleWatershed$rain[-train_inds],
+                                          mix = mod$mix,
+                                          param = mod$param)
+
+print(rmse(pred_on_test, sampleWatershed$gauge[-train_inds]))
+```
+
+As a next step, we use 'ggplot2' to generate a plot demonstrating (a) the input time series, (b) the predicted output time series, and (c) the ground truth output.
+
+```{r evaluate_plot, width = 12, height = 8}
+plot_prediction(pred_on_test,
+                sampleWatershed$gauge[-train_inds],
+                sampleWatershed$rain[-train_inds])
+```
+
+## Model parameters
+
+Finally, we can print the two main model parameters, consisting of:
+
+* a matrix characterizing the location and size of the windows (column 1 indicates all center points on the time axis, column 2 indicates the variance)
+* a vector of regression coefficients
+
+```{r evaluate_param}
+# window parameters
+print(mod$param)
+
+# regression parameters
+print(mod$mix)
+```
+
+In order to visualize the estimated windows, a kernel plot is available in <tt>SlidingWindowReg</tt>:
+
+```{r evaluate_param_plot, warning = FALSE}
+plot_kernel(param = mod$param, 
+            mix = mod$mix,
+            include_text = FALSE)
+```
