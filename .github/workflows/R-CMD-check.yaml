@@ -72,7 +72,7 @@ jobs:
         env:
           RGL_USE_NULL: TRUE
           DISPLAY: ":99"
-        run: Rscript -e "rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'error', check_dir = 'check')"
+        run: Rscript -e "rcmdcheck::rcmdcheck(error_on = 'error', check_dir = 'check')"
 
       - name: Upload check results
         if: failure()
