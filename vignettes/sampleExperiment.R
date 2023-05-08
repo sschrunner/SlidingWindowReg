@@ -37,7 +37,7 @@ pred_on_test <- SlidingWindowReg::predict(sampleWatershed$rain[-train_inds],
                                           mix = mod$mix,
                                           param = mod$param)
 
-print(rmse(pred_on_test, sampleWatershed$gauge[-train_inds]))
+print(eval_all(pred_on_test, sampleWatershed$gauge[-train_inds]))
 
 ## ----evaluate_plot, fig.width = 7, fig.height = 7, fig.align = 'center'-------
 plot_prediction(pred_on_test,

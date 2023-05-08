@@ -143,13 +143,13 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
   param <- param_hist[[best_ind]]$param
   train_metrics <- train_hist[best_ind,-1]
 
-  return(
-    list(mix = mix,
-         param = param,
-         train_hist = train_hist,
-         train_metrics = train_metrics,
-         param_hist = param_hist)
-  )
+  res <- list(mix = mix,
+              param = param,
+              train_hist = train_hist,
+              train_metrics = train_metrics,
+              param_hist = param_hist)
+  class(res) <- "SWR"
+  return(res)
 }
 
 #' @title Train model
@@ -163,7 +163,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' @param return either "best" (best model run is returned), or "all" (all model runs are returned)
 #' @param param_selection either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively
 #' @examples
-#' # train a model based on first year of observations
+#' # train a model based on one year of observations
 #' set.seed(42)
 #' train(sampleWatershed$rain[1:365],
 #'       sampleWatershed$gauge[1:365],
@@ -240,10 +240,22 @@ train <- function(ts_input, ts_output, iter = 10, runs = 10, log = FALSE,
     return(res)
   }
   else{
-    rmse <- sapply(res, function(x){return(x$train_metrics$rmse)})
-    best_rmse <- which.min(rmse)
-    res <- res[[best_rmse]]
-    class(res) <- "SWR"
+    if(param_selection == "best_rmse" || param_selection == "max"){
+      best_ind <- which.min(
+        sapply(res, function(x){return(x$train_metrics$rmse)}))
+    }
+    else if(param_selection == "best_aic"){
+      best_ind <- which.min(
+        sapply(res, function(x){return(x$train_metrics$aic)}))
+    }
+    else if(param_selection == "best_bic"){
+      best_ind <- best_ind <- which.min(
+        sapply(res, function(x){return(x$train_metrics$bic)}))
+    }
+    else{
+      stop("param_selection method unknown!")
+    }
+    res <- res[[best_ind]]
     return(res)
   }
 }

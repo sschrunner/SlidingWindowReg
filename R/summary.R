@@ -13,15 +13,19 @@ summary.SWR <- function(object,...){
 
   k = nrow(object$param)
 
-  cat(" SlidingWindowReg (SWR) model object with k = ", k, " windows\n\n");
+  cat("SlidingWindowReg (SWR) model object with k =", k, "windows")
 
-  knitr::kable(
-    data.frame(
-      window = 1:k,
-      delta = round(object$param[,1], 2),
-      sigma = round(object$param[,2], 2),
-      beta = round(object$mix, 2))
+  print(
+    knitr::kable(
+      data.frame(
+        window = 1:k,
+        delta = round(object$param[,"delta"], 2),
+        sigma = round(object$param[,"sigma"], 2),
+        beta = round(object$mix, 2))
+    )
   )
+
+  cat("\n")
 }
 
 

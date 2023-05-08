@@ -36,7 +36,7 @@ train(
 combines both training steps
 }
 \examples{
-# train a model based on first year of observations
+# train a model based on one year of observations
 set.seed(42)
 train(sampleWatershed$rain[1:365],
       sampleWatershed$gauge[1:365],

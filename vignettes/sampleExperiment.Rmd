@@ -94,14 +94,14 @@ plot_kernel(param = mod$param,
 
 ## Predictive performance
 
-To assess its predictive performance, we evaluate the model on the test set. For this purpose, we compute the root mean squared error (RMSE):
+To assess its predictive performance, we evaluate the model on the test set. For this purpose, we compute the root mean squared error (RMSE) and further evaluation metrics:
 
 ```{r evaluate_rmse}
 pred_on_test <- SlidingWindowReg::predict(sampleWatershed$rain[-train_inds],
                                           mix = mod$mix,
                                           param = mod$param)
 
-print(rmse(pred_on_test, sampleWatershed$gauge[-train_inds]))
+print(eval_all(pred_on_test, sampleWatershed$gauge[-train_inds]))
 ```
 
 As a next step, we generate a plot demonstrating 
