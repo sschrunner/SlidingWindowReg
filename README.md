@@ -11,4 +11,5 @@ Each window is characterized by
 * a location parameter $\delta$ indicating the time lag, i.e. the distance between the window center and the estimated time point on the time axis, and
 * a size parameter $\sigma$ indicating the width of the window.
 An predicted runoff associated with window $i$ is given by computing the rolling average of the input time series $x_t$ with the window kernel parameters $\kappa_i$ as weights
-$$ \kappa_i^Tx_t. $$
+
+$$ \kappa_i^T x_t. $$
