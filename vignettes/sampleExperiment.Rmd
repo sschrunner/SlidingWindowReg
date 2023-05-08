@@ -5,7 +5,7 @@ date: '2023-05-01'
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{Sample Experiment}
+  %\VignetteIndexEntry{Sample experiment using Sliding Window Regression}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -25,19 +25,26 @@ library(SlidingWindowReg)
 data("sampleWatershed")
 ```
 
-As a second step, we divide the dataset into (a) a train set containing 30 years (75\% of the time series) and (b) a test set comprising the residual 10 years (25\% of the time series)
+As a second step, we divide the dataset into (a) a train set containing 30 years (77\% of the time series) and (b) a test set comprising the residual 9 years (23\% of the time series). Note that in the present dataset, <i>years</i> refer to hydrological years (October 01 to September 30).
 
 ```{r splits}
-train_inds <- 1 : (nrow(sampleWatershed) * 0.75)
+library(lubridate) # package to handle date formats
+hydr_year <- cumsum(format(sampleWatershed$date, "%d.%m.") == "01.10.") # determine hydrological years (Oct 01 to Sep 30)
+
+train_inds <- which(hydr_year <= 30)
 ```
 
-## Run model
+# SlidingWindowReg model
 
-Given the data splits, we train the SlidingWindowReg model on the train set. For this purpose, the following parameters are used:
+Given the data splits, we train the <tt>SlidingWindowReg</tt> model on the train set. For this purpose, the following parameters are set:
 
 * <tt>iter</tt> number of iterations (maximum number of windows)
-* <tt>runs</tt> number of independent model runs
+* <tt>runs</tt> number of independent model runs --- by default, the run achieving the best performance metric is returned
 * <tt>param\_selection</tt> method to determine the number of windows
+
+## Model training
+
+In the presented example, we use 3 iterations (up to 3 windows), 1 run, and determine the hyperparameter (number of windows $k$) with respect to the Bayesian Information Criterion (BIC). Further, we set the parallelization procedure to <tt>FALSE</tt>.
 
 ```{r execute}
 mod <- SlidingWindowReg::train(sampleWatershed$rain[train_inds],
@@ -45,32 +52,26 @@ mod <- SlidingWindowReg::train(sampleWatershed$rain[train_inds],
                                iter = 3,
                                runs = 1,
                                parallel = FALSE,
-                               param_selection = "best_bic")[[1]]
+                               param_selection = "best_bic")
 ```
+
+## Parallelization
+
+Model parallelization is implemented between the model runs, while iterations (incrementally adding windows in each iterations) run in a serial order. Hence, the option <tt>parallel = FALSE</tt> should be chosen if <tt>runs = 1</tt>. In case of multiple model runs, <tt>parallel</tt> can be set to either <tt>TRUE</tt> (in this case, the number of available kernels is determined automatically), or to a positive integer number indicating the number of kernels to be used.
 
 # Evaluation
 
-In a first evaluation, we investigate the performance of the model on the test set. For this purpose, we compute the root mean squared error (RMSE):
-
-```{r evaluate_rmse}
-pred_on_test <- SlidingWindowReg::predict(sampleWatershed$rain[-train_inds],
-                                          mix = mod$mix,
-                                          param = mod$param)
-
-print(rmse(pred_on_test, sampleWatershed$gauge[-train_inds]))
-```
-
-As a next step, we generate a plot demonstrating (a) the input time series, (b) the predicted output time series, and (c) the ground truth output.
-
-```{r evaluate_plot, width = 20, height = 12}
-plot_prediction(pred_on_test,
-                sampleWatershed$gauge[-train_inds],
-                sampleWatershed$rain[-train_inds])
-```
+Tools for evaluating the model results include summary and plot functions for the model parameters, as well as metrics and plots to determine the predictive performance on test sets.
 
 ## Model parameters
 
-Finally, we can print the two main model parameters, consisting of:
+A first overview on the model results can be obtained by printing a model summary:
+
+```{r summary}
+summary(mod)
+```
+
+In specific, the main model parameters are stored as:
 
 * a matrix characterizing the location and size of the windows (column 1 indicates all center points on the time axis, column 2 indicates the variance)
 * a vector of regression coefficients
@@ -85,8 +86,36 @@ print(mod$mix)
 
 In order to visualize the estimated windows, a kernel plot is available in <tt>SlidingWindowReg</tt>:
 
-```{r evaluate_param_plot, warning = FALSE, width = 12, height = 8}
+```{r evaluate_param_plot, warning = FALSE, fig.width = 5, fig.height = 3, fig.align = 'center'}
 plot_kernel(param = mod$param, 
             mix = mod$mix,
             include_text = FALSE)
 ```
+
+## Predictive performance
+
+To assess its predictive performance, we evaluate the model on the test set. For this purpose, we compute the root mean squared error (RMSE):
+
+```{r evaluate_rmse}
+pred_on_test <- SlidingWindowReg::predict(sampleWatershed$rain[-train_inds],
+                                          mix = mod$mix,
+                                          param = mod$param)
+
+print(rmse(pred_on_test, sampleWatershed$gauge[-train_inds]))
+```
+
+As a next step, we generate a plot demonstrating 
+
+* the input time series, 
+* the predicted output time series, and 
+* the ground truth output.
+
+The plot demonstrates the first 3 and last 3 hydrological years (in this case, years 1-3 and 7-9 are displayed).
+
+```{r evaluate_plot, fig.width = 7, fig.height = 7, fig.align = 'center'}
+plot_prediction(pred_on_test,
+                sampleWatershed$gauge[-train_inds],
+                sampleWatershed$rain[-train_inds])
+```
+
+

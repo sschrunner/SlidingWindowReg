@@ -9,22 +9,26 @@ Description: The package implements a sliding multi-window model for
     hydrological inference.
 License: GPL-3
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5.0)
 Imports:
     combinat,
     dplyr,
     ggplot2,
     hydroGOF,
+    knitr,
+    methods,
     nloptr,
     parallel,
     pbapply,
     rdist,
     stats
 Suggests:
-    knitr,
-    rmarkdown
+    lubridate,
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
+Config/testthat/edition: 3

@@ -23,7 +23,7 @@ rmse <- function(prediction, reference){
     stop("Error in RMSE: prediction and reference must be vectors of the same length")
   }
   diff <- na.omit(prediction - reference)
-  return(sqrt(t(diff) %*% diff / length(diff)))
+  return(as.vector(sqrt(t(diff) %*% diff / length(diff))))
 }
 
 #' @describeIn eval_all Normalized Root Mean Squared Error

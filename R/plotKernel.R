@@ -59,6 +59,7 @@ get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
 #' @param colnames a vector of column names
 #' @param rownames a vector of row names
 #' @inheritParams plot_kernel
+#' @noRd
 plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type = "single", weighted = TRUE,
                                   xlim = NULL, include_text = TRUE){
 
@@ -213,4 +214,20 @@ plot_kernel <- function(list = NULL, param = NULL, mix = NULL, type = "single", 
                           xlim = xlim,
                           include_text = include_text)
   )
+}
+
+
+#' Plot an `SWR` model
+#' @describeIn get_kernel plot the kernel of an `SWR` model
+#' @param x an `SWR` model object
+#' @param ... further plotting parameters, see  \link{plot_kernel}
+#' @importFrom methods is
+#' @export
+plot.SWR <- function(x,...){
+  if(!is(x, "SWR")){
+    stop("Wrong class of object")
+  }
+
+  return(plot_kernel(param = x$param,
+                     mix = x$mix))
 }

@@ -1,4 +1,5 @@
 #' @describeIn train Encode parameter vector
+#' @noRd
 encodeParam <- function(mix, param){
   return(
     c(mix, as.vector(param))
@@ -8,6 +9,7 @@ encodeParam <- function(mix, param){
 #' @describeIn train Decode parameter vector
 #' @param x encoded parameter vector
 #' @param intercept if TRUE, a model with intercept is used
+#' @noRd
 decodeParam <- function(x, intercept = FALSE){
   num_win = ifelse(intercept, (length(x) - 1), length(x)) / 3
   num_mix = ifelse(intercept, num_win + 1, num_win)
@@ -15,6 +17,8 @@ decodeParam <- function(x, intercept = FALSE){
   param = matrix(x[- (1 : num_mix)],
                  ncol = 2,
                  nrow = num_win)
+
+  colnames(param) <- c("delta", "sigma")
   return(
     list(
       mix = mix,
@@ -24,6 +28,7 @@ decodeParam <- function(x, intercept = FALSE){
 }
 
 #' @describeIn train Evaluate model error
+#' @noRd
 error <- function(ts_input, ts_output, param, mix, log){
     return(rmse(predict(ts_input, mix, param, log), ts_output)
   )
@@ -32,6 +37,7 @@ error <- function(ts_input, ts_output, param, mix, log){
 #' @describeIn train Core training process
 #' @import nloptr
 #' @import dplyr
+#' @noRd
 train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bic"){
 
   # help function to compute model metrics to store training history
@@ -157,9 +163,10 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' @param return either "best" (best model run is returned), or "all" (all model runs are returned)
 #' @param param_selection either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively
 #' @examples
+#' # train a model based on first year of observations
 #' set.seed(42)
-#' train(sampleWatershed$rain,
-#'       sampleWatershed$gauge,
+#' train(sampleWatershed$rain[1:365],
+#'       sampleWatershed$gauge[1:365],
 #'       iter = 2,
 #'       runs = 1,
 #'       parallel = FALSE)
@@ -235,6 +242,8 @@ train <- function(ts_input, ts_output, iter = 10, runs = 10, log = FALSE,
   else{
     rmse <- sapply(res, function(x){return(x$train_metrics$rmse)})
     best_rmse <- which.min(rmse)
-    return(res[best_rmse])
+    res <- res[[best_rmse]]
+    class(res) <- "SWR"
+    return(res)
   }
 }

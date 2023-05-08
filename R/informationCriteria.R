@@ -20,6 +20,7 @@ BIC <- function(prediction, reference, model){
 
 #' @describeIn AIC log-likelihood function
 #' @importFrom stats var
+#' @noRd
 loglik <- function(prediction, reference){
   resid <- reference - prediction
   sigmasq <- var(resid, na.rm = TRUE)

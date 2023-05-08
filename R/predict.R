@@ -1,5 +1,6 @@
 #' @describeIn predict Convolve the time series with the window kernel
 #' @param kernel a window kernel
+#' @noRd
 convolve_window <- function(ts, kernel){
 
   # compute lengths of ts and kernel
@@ -24,6 +25,7 @@ convolve_window <- function(ts, kernel){
 
 #' @describeIn predict Build a Gaussian window kernel
 #' @importFrom stats pnorm
+#' @noRd
 build_gaussian_kernel <- function(param){
 
   if(any(is.na(param))){
