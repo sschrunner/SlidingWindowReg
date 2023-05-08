@@ -2,21 +2,11 @@
 % Please edit documentation in R/plotKernel.R
 \name{get_kernel}
 \alias{get_kernel}
-\alias{plot_multiple_kernels}
 \alias{plot_kernel}
+\alias{plot.SWR}
 \title{Return and plot accumulated kernel}
 \usage{
 get_kernel(param, mix = NULL, type = "single", weighted = TRUE)
-
-plot_multiple_kernels(
-  list,
-  colnames = NULL,
-  rownames = NULL,
-  type = "single",
-  weighted = TRUE,
-  xlim = NULL,
-  include_text = TRUE
-)
 
 plot_kernel(
   list = NULL,
@@ -27,6 +17,8 @@ plot_kernel(
   xlim = NULL,
   include_text = TRUE
 )
+
+\method{plot}{SWR}(x, ...)
 }
 \arguments{
 \item{param}{a matrix with 2 columns representing one window per row. The first column contains location parameters delta, the second column contains the standard deviation sigma.}
@@ -39,17 +31,22 @@ plot_kernel(
 
 \item{list}{a list containing multiple trained SlidingWindowReg models}
 
-\item{colnames}{a vector of column names}
-
-\item{rownames}{a vector of row names}
-
 \item{xlim}{vector with lower / upper bound of the x axis to print the kernel}
 
 \item{include_text}{if TRUE, plots will be annotated}
+
+\item{x}{an `SWR` model object}
+
+\item{...}{further plotting parameters, see  \link{plot_kernel}}
 }
 \description{
 Return and plot the accumulated kernel, consisting of one or multiple windows
 }
+\section{Functions}{
+\itemize{
+\item \code{plot(SWR)}: plot the kernel of an `SWR` model
+
+}}
 \examples{
 param <- cbind(
   delta = c(0, 10),
