@@ -11,6 +11,7 @@ mod <- SlidingWindowReg::train(sampleWatershed$rain[train_inds],
                                sampleWatershed$gauge[train_inds],
                                iter = 3,
                                runs = 1,
+                               parallel = FALSE,
                                param_selection = "best_bic")[[1]]
 
 ## ----evaluate_rmse------------------------------------------------------------

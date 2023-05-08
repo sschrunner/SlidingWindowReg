@@ -7,6 +7,7 @@
 \format{
 A data frame with 13870 rows and 2 variables:
 \describe{
+  \item{date}{date}
   \item{rain}{daily rainfall}
   \item{gauge}{daily gauge value}
 }

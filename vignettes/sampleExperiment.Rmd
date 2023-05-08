@@ -11,9 +11,9 @@ vignette: >
 
 # Introduction
 
-<tt>SlidingWindowReg</tt> is an R package, which implements a regression model for hydrological time series data. In particular, temporal windows are used to extract features from the time series by convolution with a Gaussian kernel. Then, each extracted feature is mapped to a target time series by a multiple linear regression model.
+<tt>SlidingWindowReg</tt> implements a regression model for hydrological time series data. In particular, multiple time-lagged windows with Gaussian kernel shape are estimated from training data. Then, each extracted feature is mapped to a target time series via multiple linear regression.
 
-In this vignette, a sample experiment is performed to demonstrate that the package is able to reconstruct model parameters correctly.
+In this vignette, a sample experiment is performed to demonstrate that the model is able to identify model parameters correctly in a user-simulated setup.
 
 ## Data preparation \& experimental setup
 
@@ -44,7 +44,7 @@ mod <- SlidingWindowReg::train(sampleWatershed$rain[train_inds],
                                sampleWatershed$gauge[train_inds],
                                iter = 3,
                                runs = 1,
-                               parallel = 2,
+                               parallel = FALSE,
                                param_selection = "best_bic")[[1]]
 ```
 
