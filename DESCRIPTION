@@ -5,7 +5,7 @@ Version: 0.1.0
 Authors@R: 
     person("Stefan", "Schrunner", , "stefan.schrunner@nmbu.no", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-1327-4855"))
-Description: The package implements a sliding multi-window model for
+Description: The package implements a Sliding Multi-Window Regression model for
     hydrological inference.
 License: GPL-3
 Depends: 
@@ -32,3 +32,4 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
 Config/testthat/edition: 3
+URL: https://sschrunner.github.io/SlidingWindowReg/
