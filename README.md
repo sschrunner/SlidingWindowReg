@@ -26,7 +26,7 @@ The core functionality of the package consists of a <tt>train</tt> and a <tt>pre
 
 This version of the R package can be installed as follows:
 
-  remotes::install_github("sschrunner/SlidingWindowReg", build_manual = TRUE, build_vignettes = TRUE)
+      remotes::install_github("sschrunner/SlidingWindowReg", build_manual = TRUE, build_vignettes = TRUE)
 
 ## Dependencies
 
