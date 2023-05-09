@@ -51,9 +51,10 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_prediction</span><span class="op">(</span></span>
 <span>  <span class="va">prediction</span>,</span>
 <span>  <span class="va">reference</span>,</span>
-<span>  input_ts <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ts_input <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  years <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  years <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -67,8 +68,8 @@
 <dd><p>a vector or ts object (on the same time scale as prediction) containing ground truth values</p></dd>
 
 
-<dt>input_ts</dt>
-<dd><p>a vector or ts object of input data; if NULL, no input time series  will be plotted</p></dd>
+<dt>ts_input</dt>
+<dd><p>a vector or ts object containing the input time series</p></dd>
 
 
 <dt>scale</dt>
@@ -78,6 +79,10 @@
 <dt>years</dt>
 <dd><p>a vector of years to be included in the plot; if NULL, the first 3 and last 3 years will be used</p></dd>
 
+
+<dt>...</dt>
+<dd><p>currently unused</p></dd>
+
 </dl></div>
 
     <div class="section level2">
@@ -85,10 +90,19 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">param</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  delta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  sigma <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">mixture</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">param</span><span class="op">)</span><span class="op">)</span> <span class="co"># VERSION WITHOUT INTERCEPT: ncol(param) + 1</span></span></span>
-<span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="predict.html">predict</a></span><span class="op">(</span><span class="va">sampleWatershed</span><span class="op">$</span><span class="va">rain</span>, <span class="va">mixture</span>, <span class="va">param</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">plot_prediction</span><span class="op">(</span><span class="va">pred</span>, <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">gauge</span>, <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">rain</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">param</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="createSWR.html">createSWR</a></span><span class="op">(</span>param <span class="op">=</span> <span class="va">param</span>, mix <span class="op">=</span> <span class="va">mix</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mod</span>, newdata <span class="op">=</span> <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">rain</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">plot_prediction</span><span class="op">(</span><span class="va">pred</span>,</span></span>
+<span class="r-in"><span>                prediction <span class="op">=</span> <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">gauge</span>,</span></span>
+<span class="r-in"><span>                reference <span class="op">=</span> <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">rain</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_prediction-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mod</span>,</span></span>
+<span class="r-in"><span>     type <span class="op">=</span> <span class="st">"prediction"</span>,</span></span>
+<span class="r-in"><span>     newdata <span class="op">=</span> <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">rain</span>,</span></span>
+<span class="r-in"><span>     reference <span class="op">=</span> <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">gauge</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_prediction-2.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

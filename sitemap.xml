@@ -19,7 +19,10 @@
     <loc>https://sschrunner.github.io/SlidingWindowReg/index.html</loc>
   </url>
   <url>
-    <loc>https://sschrunner.github.io/SlidingWindowReg/reference/AIC.html</loc>
+    <loc>https://sschrunner.github.io/SlidingWindowReg/reference/AIC.SWR.html</loc>
+  </url>
+  <url>
+    <loc>https://sschrunner.github.io/SlidingWindowReg/reference/createSWR.html</loc>
   </url>
   <url>
     <loc>https://sschrunner.github.io/SlidingWindowReg/reference/eval_all.html</loc>
@@ -37,7 +40,7 @@
     <loc>https://sschrunner.github.io/SlidingWindowReg/reference/plot_prediction.html</loc>
   </url>
   <url>
-    <loc>https://sschrunner.github.io/SlidingWindowReg/reference/predict.html</loc>
+    <loc>https://sschrunner.github.io/SlidingWindowReg/reference/predict.SWR.html</loc>
   </url>
   <url>
     <loc>https://sschrunner.github.io/SlidingWindowReg/reference/sampleWatershed.html</loc>
@@ -46,6 +49,6 @@
     <loc>https://sschrunner.github.io/SlidingWindowReg/reference/summary.SWR.html</loc>
   </url>
   <url>
-    <loc>https://sschrunner.github.io/SlidingWindowReg/reference/train.html</loc>
+    <loc>https://sschrunner.github.io/SlidingWindowReg/reference/trainSWR.html</loc>
   </url>
 </urlset>
