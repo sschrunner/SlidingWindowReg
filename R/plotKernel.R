@@ -44,7 +44,6 @@ get_kernel <- function(param, mix = NULL, kernel_type = "single", weighted = TRU
   # modify rownames
   if(!is.null(kernels)){
     rownames(kernels) <- paste0("kernel", 1:nrow(kernels))
-    colnames(kernels) <- (- (kernel_length - 1)) : 0
   }
   else{
     return(numeric(0))
@@ -78,19 +77,12 @@ coef.SWR <- function(object, ...){
 
 
 #' @rdname get_kernel
-#' @param colnames a vector of column names
 #' @param rownames a vector of row names
 #' @inheritParams plot_kernel
 #' @noRd
-plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, kernel_type = "single", weighted = TRUE,
+plot_multiple_kernels <- function(list, rownames = NULL, kernel_type = "single", weighted = TRUE,
                                   xlim = NULL, include_text = TRUE){
 
-  if(is.null(colnames)){
-    colnames <- rep(1, length(list))
-  }
-  else{
-    colnames <- colnames
-  }
   if(is.null(rownames)){
     if(is.null(names(list))){
       rownames <- 1:length(list)
@@ -100,7 +92,6 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, kernel
     }
   }
   rownames <- factor(rownames, levels = unique(rownames))
-  colnames <- factor(colnames, levels = unique(colnames))
 
   if(is.null(xlim)){
     xlim <- c(-50,0)
@@ -110,8 +101,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, kernel
   d <- data.frame(x = c(),
                   time = c(),
                   window = c(),
-                  rownames = c(),
-                  colnames = c())
+                  rownames = c())
 
   for(i in 1:length(list)){
     # get kernel
@@ -127,8 +117,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, kernel
             window = ordered(rep(1:nrow(kernel), each = ncol(kernel))),
             n_windows = rep(nrow(list[[i]]$param), ncol(kernel) * nrow(kernel)),
             delta = -rep(list[[i]]$param[,1], each = ncol(kernel)),
-            rownames = rownames[i],
-            colnames = colnames[i]
+            rownames = rownames[i]
           )
         )
       })
@@ -153,16 +142,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, kernel
     }
 
     if(length(unique(rownames)) > 1){
-      if(length(unique(colnames)) > 1){
-        p <- p + facet_grid(rownames~colnames)
-      }
-      else{
-        p <- p + facet_grid(rownames~.)
-      }
-    } else{
-      if(length(unique(colnames)) > 1){
-        p <- p + facet_grid(.~colnames)
-      }
+      p <- p + facet_grid(rownames~.)
     }
 
     # add formatting instructions
@@ -210,8 +190,7 @@ plot_kernel <- function(list = NULL, param = NULL, mix = NULL, kernel_type = "si
       stop("Either list or param must be specified")
     } else {
       list <- list(
-                list(param = param,
-                     mix = mix)
+                createSWR(param = param, mix = mix)
       )
     }
   } else {
@@ -221,15 +200,13 @@ plot_kernel <- function(list = NULL, param = NULL, mix = NULL, kernel_type = "si
   }
 
   if(!is.null(dim(list))){
-    rownames <- rep(dimnames(list)[[1]], prod(dim(list)[-1]))
-    colnames <- rep(dimnames(list)[[2]], each = prod(dim(list)[-2]))
+    rownames <- names(list)
   } else{
-    rownames <- colnames <- NULL
+    rownames <- NULL
   }
 
   return(
     plot_multiple_kernels(list = list,
-                          colnames = colnames,
                           rownames = rownames,
                           kernel_type = kernel_type,
                           weighted = weighted,
