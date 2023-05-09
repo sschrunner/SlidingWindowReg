@@ -51,7 +51,11 @@ Return and plot the accumulated kernel, consisting of one or multiple windows
 }
 \section{Functions}{
 \itemize{
+\item \code{get_kernel()}: return the kernel of an `SWR` model
+
 \item \code{coef(SWR)}: return the kernel of an `SWR` model
+
+\item \code{plot_kernel()}: plot the kernel of an `SWR` model
 
 \item \code{plot(SWR)}: plot the kernel of an `SWR` model
 

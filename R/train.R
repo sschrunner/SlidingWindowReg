@@ -157,7 +157,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 }
 
 #' @title Train model
-#' @description combines both training steps
+#' @description Trains an `SWR` model based on input and target time series data.
 #' @param ts_input a vector or ts object containing the input time series
 #' @param ts_output a vector or ts object (on the same time scale as ts_input) containing the target time series
 #' @param iter number of iterations (maximum number of windows)
@@ -170,11 +170,12 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' # train a model based on one year of observations
 #' set.seed(42)
 #' data(sampleWatershed)
-#' trainSWR(sampleWatershed$rain[1:365],
-#'          sampleWatershed$gauge[1:365],
-#'          iter = 2,
-#'          runs = 1,
-#'          parallel = FALSE)
+#' mod <- trainSWR(sampleWatershed$rain[1:365],
+#'                 sampleWatershed$gauge[1:365],
+#'                 iter = 2,
+#'                 runs = 1,
+#'                 parallel = FALSE)
+#' summary(mod)
 #' @import pbapply
 #' @import parallel
 #' @export

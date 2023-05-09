@@ -1,5 +1,6 @@
 #' Summarizes an `SWR` model
 #' @description A summary of an `SWR` model
+#' @describeIn summary.SWR Summarizes the `SWR` model
 #' @param object an `SWR` model object created using \link{trainSWR}
 #' @param ... currently unused
 #' @importFrom methods is

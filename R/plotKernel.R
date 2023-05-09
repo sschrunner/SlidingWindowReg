@@ -1,5 +1,6 @@
 #' @title Return and plot accumulated kernel
 #' @description Return and plot the accumulated kernel, consisting of one or multiple windows
+#' @describeIn get_kernel return the kernel of an `SWR` model
 #' @inheritParams createSWR
 #' @param kernel_type a String indicating whether (a) all single windows (option: "single"), or (b) the combined kernel (option "combined")
 #' @param weighted if TRUE, windows are weighted with mix parameters; default: TRUE
@@ -196,7 +197,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, kernel
 
 
 #' @title Plot accumulated kernel
-#' @rdname get_kernel
+#' @describeIn get_kernel plot the kernel of an `SWR` model
 #' @param list a list containing multiple trained SlidingWindowReg models
 #' @param xlim vector with lower / upper bound of the x axis to print the kernel
 #' @param include_text if TRUE, plots will be annotated

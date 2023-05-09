@@ -27,7 +27,7 @@ data("sampleWatershed")
 
 As a second step, we divide the dataset into (a) a train set containing 30 years (77\% of the time series) and (b) a test set comprising the residual 9 years (23\% of the time series). Note that in the present dataset, <i>years</i> refer to hydrological years (October 01 to September 30).
 
-```{r splits, warning=FALSE}
+```{r splits, info = FALSE}
 library(lubridate) # package to handle date formats
 hydr_year <- cumsum(format(sampleWatershed$date, "%d.%m.") == "01.10.") # determine hydrological years (Oct 01 to Sep 30)
 

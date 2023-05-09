@@ -21,6 +21,8 @@ A summary of an `SWR` model
 }
 \section{Functions}{
 \itemize{
+\item \code{summary(SWR)}: Summarizes the `SWR` model
+
 \item \code{dim(SWR)}: Returns the number of windows of the `SWR` model
 
 }}

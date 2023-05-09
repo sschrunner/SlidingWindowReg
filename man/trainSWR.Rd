@@ -33,15 +33,16 @@ trainSWR(
 \item{param_selection}{either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively}
 }
 \description{
-combines both training steps
+Trains an `SWR` model based on input and target time series data.
 }
 \examples{
 # train a model based on one year of observations
 set.seed(42)
 data(sampleWatershed)
-trainSWR(sampleWatershed$rain[1:365],
-         sampleWatershed$gauge[1:365],
-         iter = 2,
-         runs = 1,
-         parallel = FALSE)
+mod <- trainSWR(sampleWatershed$rain[1:365],
+                sampleWatershed$gauge[1:365],
+                iter = 2,
+                runs = 1,
+                parallel = FALSE)
+summary(mod)
 }
