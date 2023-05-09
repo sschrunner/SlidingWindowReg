@@ -1,6 +1,6 @@
 #' Summarizes an `SWR` model
 #' @description A summary of an `SWR` model
-#' @param object a `SWR` model object created using \link{train}
+#' @param object an `SWR` model object created using \link{trainSWR}
 #' @param ... currently unused
 #' @importFrom methods is
 #' @importFrom knitr kable
@@ -26,6 +26,19 @@ summary.SWR <- function(object,...){
   )
 
   cat("\n")
+}
+
+#' @describeIn summary.SWR Returns the number of windows of the `SWR` model
+#' @param x an `SWR` model object created using \link{trainSWR}
+#' @importFrom methods is
+#' @export
+dim.SWR <- function(x){
+
+  if(!is(x, "SWR")){
+    stop("Wrong class of object")
+  }
+
+  return(nrow(x$param))
 }
 
 

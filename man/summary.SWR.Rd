@@ -2,15 +2,25 @@
 % Please edit documentation in R/summary.R
 \name{summary.SWR}
 \alias{summary.SWR}
+\alias{dim.SWR}
 \title{Summarizes an `SWR` model}
 \usage{
 \method{summary}{SWR}(object, ...)
+
+\method{dim}{SWR}(x)
 }
 \arguments{
-\item{object}{a `SWR` model object created using \link{train}}
+\item{object}{an `SWR` model object created using \link{trainSWR}}
 
 \item{...}{currently unused}
+
+\item{x}{an `SWR` model object created using \link{trainSWR}}
 }
 \description{
 A summary of an `SWR` model
 }
+\section{Functions}{
+\itemize{
+\item \code{dim(SWR)}: Returns the number of windows of the `SWR` model
+
+}}

@@ -7,9 +7,10 @@
 plot_prediction(
   prediction,
   reference,
-  input_ts = NULL,
+  ts_input = NULL,
   scale = "year",
-  years = NULL
+  years = NULL,
+  ...
 )
 }
 \arguments{
@@ -17,11 +18,13 @@ plot_prediction(
 
 \item{reference}{a vector or ts object (on the same time scale as prediction) containing ground truth values}
 
-\item{input_ts}{a vector or ts object of input data; if NULL, no input time series  will be plotted}
+\item{ts_input}{a vector or ts object containing the input time series}
 
 \item{scale}{a String indicating which scale should be used for plotting; options are "year", "month" or "week"; default is "year"}
 
 \item{years}{a vector of years to be included in the plot; if NULL, the first 3 and last 3 years will be used}
+
+\item{...}{currently unused}
 }
 \description{
 plot the prediction and the reference
@@ -30,7 +33,15 @@ plot the prediction and the reference
 param <- cbind(
   delta = c(0, 10),
   sigma = c(2, 3))
-mixture <- rep(1, ncol(param)) # VERSION WITHOUT INTERCEPT: ncol(param) + 1
-pred <- predict(sampleWatershed$rain, mixture, param)
-plot_prediction(pred, sampleWatershed$gauge, sampleWatershed$rain)
+mix <- rep(1, ncol(param))
+mod <- createSWR(param = param, mix = mix)
+pred <- predict(mod, newdata = sampleWatershed$rain)
+
+plot_prediction(pred,
+                prediction = sampleWatershed$gauge,
+                reference = sampleWatershed$rain)
+plot(mod,
+     type = "prediction",
+     newdata = sampleWatershed$rain,
+     reference = sampleWatershed$gauge)
 }

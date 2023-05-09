@@ -30,7 +30,7 @@ decodeParam <- function(x, intercept = FALSE){
 #' @describeIn train Evaluate model error
 #' @noRd
 error <- function(ts_input, ts_output, param, mix, log){
-    return(rmse(predict(ts_input, mix, param, log), ts_output)
+    return(rmse(predict_target(ts_input, mix, param, log), ts_output)
   )
 }
 
@@ -42,12 +42,16 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 
   # help function to compute model metrics to store training history
   append_hist <- function(train_hist, mix, param, operation_str){
-    predict(ts_input, mix, param, log) -> p
+    mod <- createSWR(param = param, mix = mix)
+    predict(mod, newdata = ts_input, log = log) -> p
+    #predict_target(ts_input, mix, param, log) -> p
     train_hist <- rbind(train_hist,
                         cbind(
                           operation = operation_str,
-                          aic = SlidingWindowReg::AIC(p, ts_output, list(mix = mix, param = param)),
-                          bic = SlidingWindowReg::BIC(p, ts_output, list(mix = mix, param = param)),
+                          aic = AIC(mod, ts_input = ts_input, ts_output = ts_output),
+                          bic = BIC(mod, ts_input = ts_input, ts_output = ts_output),
+                          #aic = AIC(p, ts_output, list(mix = mix, param = param)),
+                          #bic = BIC(p, ts_output, list(mix = mix, param = param)),
                           eval_all(p, ts_output)
                         )
     )
@@ -143,12 +147,12 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
   param <- param_hist[[best_ind]]$param
   train_metrics <- train_hist[best_ind,-1]
 
-  res <- list(mix = mix,
-              param = param,
-              train_hist = train_hist,
-              train_metrics = train_metrics,
-              param_hist = param_hist)
-  class(res) <- "SWR"
+  res <- createSWR(mix = mix,
+                   param = param)
+  res$train_hist = train_hist
+  res$train_metrics = train_metrics
+  res$param_hist = param_hist
+
   return(res)
 }
 
@@ -165,15 +169,16 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' @examples
 #' # train a model based on one year of observations
 #' set.seed(42)
-#' train(sampleWatershed$rain[1:365],
-#'       sampleWatershed$gauge[1:365],
-#'       iter = 2,
-#'       runs = 1,
-#'       parallel = FALSE)
+#' data(sampleWatershed)
+#' trainSWR(sampleWatershed$rain[1:365],
+#'          sampleWatershed$gauge[1:365],
+#'          iter = 2,
+#'          runs = 1,
+#'          parallel = FALSE)
 #' @import pbapply
 #' @import parallel
 #' @export
-train <- function(ts_input, ts_output, iter = 10, runs = 10, log = FALSE,
+trainSWR <- function(ts_input, ts_output, iter = 10, runs = 10, log = FALSE,
                   parallel = TRUE, return = "best", param_selection = "best_rmse"){
 
   if(length(ts_input) != length(ts_output)){
@@ -228,7 +233,7 @@ train <- function(ts_input, ts_output, iter = 10, runs = 10, log = FALSE,
   # add fitted & residuals to list objects
   res <- lapply(1:length(res), function(x){
     r <- res[[x]]
-    r$fitted <- predict(ts_input, r$mix, r$param)
+    r$fitted <- predict_target(ts_input, r$mix, r$param)
     r$residuals <- ts_output - r$fitted
     return(r)})
 

@@ -1,20 +1,29 @@
 #' @title Plot prediction
 #' @description plot the prediction and the reference
 #' @inheritParams eval_all
-#' @param input_ts a vector or ts object of input data; if NULL, no input time series  will be plotted
+#' @inheritParams trainSWR
 #' @param scale a String indicating which scale should be used for plotting; options are "year", "month" or "week"; default is "year"
 #' @param years a vector of years to be included in the plot; if NULL, the first 3 and last 3 years will be used
+#' @param ... currently unused
 #' @examples
 #' param <- cbind(
 #'   delta = c(0, 10),
 #'   sigma = c(2, 3))
-#' mixture <- rep(1, ncol(param)) # VERSION WITHOUT INTERCEPT: ncol(param) + 1
-#' pred <- predict(sampleWatershed$rain, mixture, param)
-#' plot_prediction(pred, sampleWatershed$gauge, sampleWatershed$rain)
+#' mix <- rep(1, ncol(param))
+#' mod <- createSWR(param = param, mix = mix)
+#' pred <- predict(mod, newdata = sampleWatershed$rain)
+#'
+#' plot_prediction(pred,
+#'                 prediction = sampleWatershed$gauge,
+#'                 reference = sampleWatershed$rain)
+#' plot(mod,
+#'      type = "prediction",
+#'      newdata = sampleWatershed$rain,
+#'      reference = sampleWatershed$gauge)
 #' @import ggplot2
 #' @importFrom stats na.omit
 #' @export
-plot_prediction <- function(prediction, reference, input_ts = NULL, scale = "year", years = NULL){
+plot_prediction <- function(prediction, reference, ts_input = NULL, scale = "year", years = NULL, ...){
 
   # create data.frame
   d <- data.frame(t = 1:length(prediction),
@@ -29,18 +38,18 @@ plot_prediction <- function(prediction, reference, input_ts = NULL, scale = "yea
                   day_of_week = (1:length(prediction)) %% 7)
 
   # append input time series, if provided
-  if(!is.null(input_ts)){
+  if(!is.null(ts_input)){
     d <- rbind(d, data.frame(
-      t = 1:length(input_ts),
-      gauge = input_ts,
+      t = 1:length(ts_input),
+      gauge = ts_input,
       type = "input",
       category = "rain",
-      year = rep(1 : (length(input_ts) / 365), each = 365)[1:length(input_ts)],
-      day_of_year = (1:length(input_ts)) %% 365,
-      month = rep(1 : (length(input_ts) / 30), each = 30)[1:length(input_ts)],
-      day_of_month = (1:length(input_ts)) %% 30,
-      week = rep(1 : (length(input_ts) / 7), each = 7)[1:length(input_ts)],
-      day_of_week = (1:length(input_ts)) %% 7)
+      year = rep(1 : (length(ts_input) / 365), each = 365)[1:length(ts_input)],
+      day_of_year = (1:length(ts_input)) %% 365,
+      month = rep(1 : (length(ts_input) / 30), each = 30)[1:length(ts_input)],
+      day_of_month = (1:length(ts_input)) %% 30,
+      week = rep(1 : (length(ts_input) / 7), each = 7)[1:length(ts_input)],
+      day_of_week = (1:length(ts_input)) %% 7)
     )
   }
 

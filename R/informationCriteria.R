@@ -1,24 +1,39 @@
 #' @title Information Criteria
 #' @description Computes Akaike's Information Criterion (AIC) and Bayesian Information Criterion (BIC).
-#' @param prediction a vector or ts object of predicted values
-#' @param reference a vector or ts object (on the same time scale as prediction) containing ground truth values
-#' @param model a SlidingWindowReg model
+#' @describeIn AIC.SWR Akaike's Information Criterion
+#' @inheritParams summary.SWR
+#' @inheritParams trainSWR
 #' @return AIC or BIC value
-#' @describeIn AIC Akaike's Information Criterion
+#' @importFrom stats AIC
+#' @importFrom methods is
 #' @export
-AIC <- function(prediction, reference, model){
-  lik <- loglik(prediction, reference)
-  return(-2 * lik + 2 * (length(model$mix) + length(model$param)))
+AIC.SWR <- function(object, ts_input, ts_output, ...){
+
+  if(!is(object, "SWR")){
+    stop("Wrong class of object")
+  }
+
+  lik <- loglik(predict(object, newdata = ts_input),
+                ts_output)
+  return(-2 * lik + 2 * (length(object$mix) + length(object$param)))
 }
 
-#' @describeIn AIC Bayesian Information Criterion
+#' @describeIn AIC.SWR Bayesian Information Criterion
+#' @importFrom stats BIC
+#' @importFrom methods is
 #' @export
-BIC <- function(prediction, reference, model){
-  lik <- loglik(prediction, reference)
-  return(-2 * lik + log(length(reference)) * (length(model$mix) + length(model$param)))
+BIC.SWR <- function(object, ts_input, ts_output, ...){
+
+  if(!is(object, "SWR")){
+    stop("Wrong class of object")
+  }
+
+  lik <- loglik(predict(object, newdata = ts_input),
+                ts_output)
+  return(-2 * lik + log(length(ts_input)) * (length(object$mix) + length(object$param)))
 }
 
-#' @describeIn AIC log-likelihood function
+#' @describeIn AIC.SWR log-likelihood function
 #' @importFrom stats var
 #' @noRd
 loglik <- function(prediction, reference){

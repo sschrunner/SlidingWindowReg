@@ -48,8 +48,8 @@ overlap <- function(param_prediction, param_reference, mix_prediction = NULL, mi
     mix_reference = rep(1 / nrow(param_reference), nrow(param_reference)) # VERSION WITH INTERCEPT: c(0,....)
   }
 
-  k1 <- get_kernel(param_prediction, type = "combined", mix = mix_prediction, weighted = TRUE)# / nrow(param_prediction)
-  k2 <- get_kernel(param_reference, type = "combined", mix = mix_reference, weighted = TRUE)# / nrow(param_reference)
+  k1 <- get_kernel(param_prediction, kernel_type = "combined", mix = mix_prediction, weighted = TRUE)# / nrow(param_prediction)
+  k2 <- get_kernel(param_reference, kernel_type = "combined", mix = mix_reference, weighted = TRUE)# / nrow(param_reference)
 
   len_diff <- length(k1) - length(k2)
   if(len_diff > 0){

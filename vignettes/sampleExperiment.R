@@ -3,7 +3,7 @@ library(SlidingWindowReg)
 
 data("sampleWatershed")
 
-## ----splits-------------------------------------------------------------------
+## ----splits, warning=FALSE----------------------------------------------------
 library(lubridate) # package to handle date formats
 hydr_year <- cumsum(format(sampleWatershed$date, "%d.%m.") == "01.10.") # determine hydrological years (Oct 01 to Sep 30)
 
@@ -31,16 +31,4 @@ print(mod$mix)
 plot_kernel(param = mod$param, 
             mix = mod$mix,
             include_text = FALSE)
-
-## ----evaluate_rmse------------------------------------------------------------
-pred_on_test <- SlidingWindowReg::predict(sampleWatershed$rain[-train_inds],
-                                          mix = mod$mix,
-                                          param = mod$param)
-
-print(eval_all(pred_on_test, sampleWatershed$gauge[-train_inds]))
-
-## ----evaluate_plot, fig.width = 7, fig.height = 7, fig.align = 'center'-------
-plot_prediction(pred_on_test,
-                sampleWatershed$gauge[-train_inds],
-                sampleWatershed$rain[-train_inds])
 

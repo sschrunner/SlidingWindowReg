@@ -2,32 +2,39 @@
 % Please edit documentation in R/plotKernel.R
 \name{get_kernel}
 \alias{get_kernel}
+\alias{coef.SWR}
 \alias{plot_kernel}
 \alias{plot.SWR}
 \title{Return and plot accumulated kernel}
 \usage{
-get_kernel(param, mix = NULL, type = "single", weighted = TRUE)
+get_kernel(param, mix = NULL, kernel_type = "single", weighted = TRUE)
+
+\method{coef}{SWR}(object, ...)
 
 plot_kernel(
   list = NULL,
   param = NULL,
   mix = NULL,
-  type = "single",
+  kernel_type = "single",
   weighted = TRUE,
   xlim = NULL,
   include_text = TRUE
 )
 
-\method{plot}{SWR}(x, ...)
+\method{plot}{SWR}(x, type = "kernel", ...)
 }
 \arguments{
 \item{param}{a matrix with 2 columns representing one window per row. The first column contains location parameters delta, the second column contains the standard deviation sigma.}
 
 \item{mix}{a vector of mixing parameters (beta)}
 
-\item{type}{a String indicating whether (a) all single windows (option: "single"), or (b) the combined kernel (option "combined")}
+\item{kernel_type}{a String indicating whether (a) all single windows (option: "single"), or (b) the combined kernel (option "combined")}
 
 \item{weighted}{if TRUE, windows are weighted with mix parameters; default: TRUE}
+
+\item{object}{an `SWR` model object created using \link{trainSWR}}
+
+\item{...}{further plotting parameters, see  \link{plot_kernel} or \link{plot_prediction}, respectively}
 
 \item{list}{a list containing multiple trained SlidingWindowReg models}
 
@@ -37,13 +44,15 @@ plot_kernel(
 
 \item{x}{an `SWR` model object}
 
-\item{...}{further plotting parameters, see  \link{plot_kernel}}
+\item{type}{either "kernel" to produce a plot of the window kernels, or "prediction" to plot the model predictions, see \link{plot_prediction}}
 }
 \description{
 Return and plot the accumulated kernel, consisting of one or multiple windows
 }
 \section{Functions}{
 \itemize{
+\item \code{coef(SWR)}: return the kernel of an `SWR` model
+
 \item \code{plot(SWR)}: plot the kernel of an `SWR` model
 
 }}
@@ -52,6 +61,11 @@ param <- cbind(
   delta = c(0, 10),
   sigma = c(2, 3))
 mix <- rep(1, ncol(param))
+mod <- createSWR(param = param, mix = mix)
+
 get_kernel(param = param, mix = mix)
+coef(mod)
+
 plot_kernel(param = param, mix = mix)
+plot(mod)
 }

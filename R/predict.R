@@ -1,4 +1,4 @@
-#' @describeIn predict Convolve the time series with the window kernel
+#' @describeIn predict_target Convolve the time series with the window kernel
 #' @param kernel a window kernel
 #' @noRd
 convolve_window <- function(ts, kernel){
@@ -23,7 +23,7 @@ convolve_window <- function(ts, kernel){
   return(res)
 }
 
-#' @describeIn predict Build a Gaussian window kernel
+#' @describeIn predict_target Build a Gaussian window kernel
 #' @importFrom stats pnorm
 #' @noRd
 build_gaussian_kernel <- function(param){
@@ -59,12 +59,13 @@ build_gaussian_kernel <- function(param){
 
 #' @title Predict target variable
 #' @description predicts the target variable given a time series of inputs, and trained parameters
-#' @param ts a vector or ts object
+#' @param ts a vector or ts object of new model inputs to predict
 #' @param mix a vector of mixing parameters (beta)
 #' @param param a matrix with 2 columns representing one window per row. The first column contains location parameters delta, the second column contains the standard deviation sigma.
 #' @param log whether a log-linear model should be used
-#' @export
-predict <- function(ts, mix, param, log = FALSE){
+#' @param ... currently unused
+#' @noRd
+predict_target <- function(ts, mix, param, log = FALSE, ...){
   if(!is.vector(ts)){
     stop("Error in predict: ts must be a vector")
   }
@@ -92,4 +93,24 @@ predict <- function(ts, mix, param, log = FALSE){
     res <- rep(0, length(ts))
   }
   return(res)
+}
+
+#' @title Predict target variable
+#' @description predicts the target variable given a time series of inputs, and trained parameters
+#' @param object an `SWR` model object created using \link{trainSWR}
+#' @param newdata a vector or ts object of new model inputs to predict
+#' @param ... currently unused
+#' @importFrom stats predict
+#' @importFrom methods is
+#' @export
+predict.SWR <- function(object, newdata,...){
+
+  if(!is(object, "SWR")){
+    stop("Wrong class of object")
+  }
+
+  return(predict_target(ts = newdata,
+                 param = object$param,
+                 mix = object$mix,
+                 ...))
 }

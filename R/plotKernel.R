@@ -1,17 +1,22 @@
 #' @title Return and plot accumulated kernel
 #' @description Return and plot the accumulated kernel, consisting of one or multiple windows
-#' @inheritParams predict
-#' @param type a String indicating whether (a) all single windows (option: "single"), or (b) the combined kernel (option "combined")
+#' @inheritParams createSWR
+#' @param kernel_type a String indicating whether (a) all single windows (option: "single"), or (b) the combined kernel (option "combined")
 #' @param weighted if TRUE, windows are weighted with mix parameters; default: TRUE
 #' @examples
 #' param <- cbind(
 #'   delta = c(0, 10),
 #'   sigma = c(2, 3))
 #' mix <- rep(1, ncol(param))
+#' mod <- createSWR(param = param, mix = mix)
+#'
 #' get_kernel(param = param, mix = mix)
+#' coef(mod)
+#'
 #' plot_kernel(param = param, mix = mix)
+#' plot(mod)
 #' @export
-get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
+get_kernel <- function(param, mix = NULL, kernel_type = "single", weighted = TRUE){
 
   if(!is.matrix(param) || ncol(param) != 2){
     stop("Error in get_kernel: param must be a matrix with 2 columns")
@@ -44,23 +49,39 @@ get_kernel <- function(param, mix = NULL, type = "single", weighted = TRUE){
     return(numeric(0))
   }
 
-  # return according to type
-  if(type == "single"){
+  # return according to kernel_type
+  if(kernel_type == "single"){
     return(kernels * mix) # VERSION WITH INTERCEPT: mix[-1]
-  } else if(type == "combined"){
+  } else if(kernel_type == "combined"){
     return(mix %*% kernels)# VERSION WITH INTERCEPT: mix[-1]
   }
   else{
-    stop("Error in get_kernel: unknown type")
+    stop("Error in get_kernel: unknown kernel type")
   }
 }
+
+#' @describeIn get_kernel return the kernel of an `SWR` model
+#' @inheritParams summary.SWR
+#' @importFrom methods is
+#' @export
+coef.SWR <- function(object, ...){
+
+  if(!is(object, "SWR")){
+    stop("Wrong class of object")
+  }
+
+  return(get_kernel(param = object$param,
+                    mix = object$mix,
+                    ...))
+}
+
 
 #' @rdname get_kernel
 #' @param colnames a vector of column names
 #' @param rownames a vector of row names
 #' @inheritParams plot_kernel
 #' @noRd
-plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type = "single", weighted = TRUE,
+plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, kernel_type = "single", weighted = TRUE,
                                   xlim = NULL, include_text = TRUE){
 
   if(is.null(colnames)){
@@ -93,7 +114,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
 
   for(i in 1:length(list)){
     # get kernel
-    kernel <- get_kernel(list[[i]]$param, list[[i]]$mix, type, weighted)
+    kernel <- get_kernel(list[[i]]$param, list[[i]]$mix, kernel_type, weighted)
     # produces warning due to removed names
     if(length(kernel) > 0){
       suppressWarnings({
@@ -117,14 +138,14 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
     # avoid package compilation warning
     time <- x <- window <- delta <- n_windows <- NULL
 
-    if(type == "single"){
+    if(kernel_type == "single"){
       p <- ggplot(d,
                   aes(x = time,
                       y = x,
                       color = window,
                       group_by = window)) +
         scale_color_brewer(palette = "Dark2")
-    } else if(type == "combined"){
+    } else if(kernel_type == "combined"){
       p <- ggplot(d,
                   aes(x = time,
                       y = x))
@@ -181,7 +202,7 @@ plot_multiple_kernels <- function(list, colnames = NULL, rownames = NULL, type =
 #' @param include_text if TRUE, plots will be annotated
 #' @import ggplot2
 #' @export
-plot_kernel <- function(list = NULL, param = NULL, mix = NULL, type = "single", weighted = TRUE, xlim = NULL, include_text = TRUE){
+plot_kernel <- function(list = NULL, param = NULL, mix = NULL, kernel_type = "single", weighted = TRUE, xlim = NULL, include_text = TRUE){
 
   if(is.null(list)){
     if(is.null(param)){
@@ -209,7 +230,7 @@ plot_kernel <- function(list = NULL, param = NULL, mix = NULL, type = "single", 
     plot_multiple_kernels(list = list,
                           colnames = colnames,
                           rownames = rownames,
-                          type = type,
+                          kernel_type = kernel_type,
                           weighted = weighted,
                           xlim = xlim,
                           include_text = include_text)
@@ -220,14 +241,29 @@ plot_kernel <- function(list = NULL, param = NULL, mix = NULL, type = "single", 
 #' Plot an `SWR` model
 #' @describeIn get_kernel plot the kernel of an `SWR` model
 #' @param x an `SWR` model object
-#' @param ... further plotting parameters, see  \link{plot_kernel}
+#' @param type either "kernel" to produce a plot of the window kernels, or "prediction" to plot the model predictions, see \link{plot_prediction}
+#' @param ... further plotting parameters, see  \link{plot_kernel} or \link{plot_prediction}, respectively
 #' @importFrom methods is
 #' @export
-plot.SWR <- function(x,...){
+plot.SWR <- function(x, type = "kernel", ...){
+
   if(!is(x, "SWR")){
     stop("Wrong class of object")
   }
 
-  return(plot_kernel(param = x$param,
-                     mix = x$mix))
+  if(type == "kernel"){
+    return(plot_kernel(param = x$param,
+                     mix = x$mix,
+                     ...))
+  }
+  else if(type == "prediction"){
+    pred <- predict(x, ...)
+
+    return(plot_prediction(prediction = pred, ...))
+  }
+  else{
+    stop("Unknown plot type")
+  }
+
+
 }
