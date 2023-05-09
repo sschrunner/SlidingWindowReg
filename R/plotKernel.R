@@ -15,7 +15,7 @@
 #' coef(mod)
 #'
 #' plot_kernel(param = param, mix = mix)
-#' plot(mod)
+#' plot(mod, type = "kernel")
 #' @export
 get_kernel <- function(param, mix = NULL, kernel_type = "single", weighted = TRUE){
 
