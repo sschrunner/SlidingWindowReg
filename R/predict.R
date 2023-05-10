@@ -69,12 +69,11 @@ predict_target <- function(ts, mix, param, log = FALSE, ...){
   if(!is.vector(ts)){
     stop("Error in predict: ts must be a vector")
   }
-  if(!is.vector(mix) || !is.matrix(param) || length(mix) != nrow(param)){ # VERSION WITH INTERCEPT: nrow(param) + 1
+  if(!is.vector(mix) || !is.matrix(param) || length(mix) != nrow(param)){
     stop("Error in predict: provided parameters are not consistent")
   }
 
   # compute offset and convolution for each window
-  #offset <- mix[1] #VERSION WITH INTERCEPT
   if(nrow(param) > 0){
     conv <- apply(param,
                   1,
@@ -86,7 +85,7 @@ predict_target <- function(ts, mix, param, log = FALSE, ...){
     if(log){
       conv <- log(conv)
     }
-    res <- as.vector(conv %*% mix) # VERSION WITH INTERCEPT: offset + ... mix[-1]
+    res <- as.vector(conv %*% mix)
 
   }
   else{

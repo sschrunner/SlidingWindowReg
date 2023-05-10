@@ -42,10 +42,10 @@ overlap <- function(param_prediction, param_reference, mix_prediction = NULL, mi
   }
 
   if(is.null(mix_prediction)){
-    mix_prediction = rep(1 / nrow(param_prediction), nrow(param_prediction)) # VERSION WITH INTERCEPT: c(0,....)
+    mix_prediction = rep(1 / nrow(param_prediction), nrow(param_prediction))
   }
   if(is.null(mix_reference)){
-    mix_reference = rep(1 / nrow(param_reference), nrow(param_reference)) # VERSION WITH INTERCEPT: c(0,....)
+    mix_reference = rep(1 / nrow(param_reference), nrow(param_reference))
   }
 
   k1 <- get_kernel(param_prediction, kernel_type = "combined", mix = mix_prediction, weighted = TRUE)# / nrow(param_prediction)

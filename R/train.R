@@ -44,14 +44,11 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
   append_hist <- function(train_hist, mix, param, operation_str){
     mod <- createSWR(param = param, mix = mix)
     predict(mod, newdata = ts_input, log = log) -> p
-    #predict_target(ts_input, mix, param, log) -> p
     train_hist <- rbind(train_hist,
                         cbind(
                           operation = operation_str,
                           aic = AIC(mod, ts_input = ts_input, ts_output = ts_output),
                           bic = BIC(mod, ts_input = ts_input, ts_output = ts_output),
-                          #aic = AIC(p, ts_output, list(mix = mix, param = param)),
-                          #bic = BIC(p, ts_output, list(mix = mix, param = param)),
                           eval_all(p, ts_output)
                         )
     )
@@ -62,21 +59,22 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 
   # parameter initialization
   param <- matrix(,nrow = 0, ncol = 2)
-  mix = c() # VERSION WITH INTERCEPT: 1
+  mix = c()
 
   # iteration counter
   i = 1
   stop = FALSE
 
   while(!stop){
+
     if(i > 1){
       delta_new <- c(param[,1], max(param[,1] + 1))
-      mix_new <- rep(sum(mix) / i, i)#VERSION WITH INTERCEPT: c(mix[1], rep(sum(mix[-1]) / i, i)) # use previous mixture and distribute upon i windows
+      mix_new <- rep(sum(mix) / i, i)
       sigma_new <- rep(sum(param[,2]) / i, i) # use previous sigma and distribute upon i windows
     }
     else{
       delta_new <- 1
-      mix_new <- 1 # VERSION WITH INTERCEPT: c(mean(ts_output),1)
+      mix_new <- 1
       sigma_new <- 1
     }
 
@@ -111,7 +109,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
     if(nrow(param) > 1){
       o <- order(param[,1])
       param <- param[o,]
-      mix <- mix[o] #VERSION WITH INTERCEPT: mix[-1] <- (mix[-1])[o]
+      mix <- mix[o]
     }
 
     # add parameter history entry

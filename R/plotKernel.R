@@ -25,12 +25,12 @@ get_kernel <- function(param, mix = NULL, kernel_type = "single", weighted = TRU
   if(weighted) {
     if(is.null(mix)){
       # set mix to default
-      mix <- rep(1, nrow(param))# VERSION WITH INTERCEPT: rep(1, nrow(param) + 1)
-    } else if(!is.vector(mix) || length(mix) != (nrow(param))){# VERSION WITH INTERCEPT: nrow(param) + 1
+      mix <- rep(1, nrow(param))
+    } else if(!is.vector(mix) || length(mix) != (nrow(param))){
       stop("Error in get_kernel: provided parameters are not consistent")
     }
   } else{
-    mix <- rep(1, nrow(param))# VERSION WITH INTERCEPT: rep(1, nrow(param) + 1)
+    mix <- rep(1, nrow(param))
   }
 
   # compute kernels
@@ -51,9 +51,9 @@ get_kernel <- function(param, mix = NULL, kernel_type = "single", weighted = TRU
 
   # return according to kernel_type
   if(kernel_type == "single"){
-    return(kernels * mix) # VERSION WITH INTERCEPT: mix[-1]
+    return(kernels * mix)
   } else if(kernel_type == "combined"){
-    return(mix %*% kernels)# VERSION WITH INTERCEPT: mix[-1]
+    return(mix %*% kernels)
   }
   else{
     stop("Error in get_kernel: unknown kernel type")

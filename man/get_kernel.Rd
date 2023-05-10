@@ -71,5 +71,5 @@ get_kernel(param = param, mix = mix)
 coef(mod)
 
 plot_kernel(param = param, mix = mix)
-plot(mod)
+plot(mod, type = "kernel")
 }
