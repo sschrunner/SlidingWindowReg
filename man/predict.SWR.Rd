@@ -7,7 +7,7 @@
 \method{predict}{SWR}(object, newdata, ...)
 }
 \arguments{
-\item{object}{an `SWR` model object created using \link{trainSWR}}
+\item{object}{an \code{SWR} model object created using \link{trainSWR}}
 
 \item{newdata}{a vector or ts object of new model inputs to predict}
 

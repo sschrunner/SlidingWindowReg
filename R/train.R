@@ -59,7 +59,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 
   # parameter initialization
   param <- matrix(,nrow = 0, ncol = 2)
-  mix = c()
+  mix <- c()
 
   # iteration counter
   i = 1
@@ -67,50 +67,69 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 
   while(!stop){
 
+    # heuristic initialization
     if(i > 1){
-      delta_new <- c(param[,1], max(param[,1] + 1))
+      delta_opts <- c(max(min(param[,1] - 1), 0), # minimum point - 1
+                      param[-nrow(param),1] + diff(param[,1]) / 2, # center point between kernels
+                      max(param[,1] + 1))
       mix_new <- rep(sum(mix) / i, i)
       sigma_new <- rep(sum(param[,2]) / i, i) # use previous sigma and distribute upon i windows
     }
     else{
-      delta_new <- 1
-      mix_new <- 1
-      sigma_new <- 1
+      delta_opts = 1
+      mix_new = 1
+      sigma_new = 1
     }
 
-    param <- cbind(delta_new, sigma_new)
-    mix <- mix_new
+    delta <- param[,1]
+    delta_bic <- c()
+    param_ <- list()
+    mix_ <- list()
+    for(delta_new in delta_opts){
+      param <- cbind(delta = c(delta, delta_new),
+                     sigma = sigma_new)
+      mix <- mix_new
 
-    # RUN OPTIMIZATION ALGORITHM
-    opts <- list("algorithm"="NLOPT_LN_BOBYQA",
-                 "xtol_rel" = 0,
-                 "ftol_rel" = 0,
-                 "xtol_abs" = 0,
-                 "ftol_abs" = 1e-8)
+      # RUN OPTIMIZATION ALGORITHM
+      opts <- list("algorithm"="NLOPT_LN_BOBYQA",
+                   "xtol_rel" = 0,
+                   "ftol_rel" = 0,
+                   "xtol_abs" = 0,
+                   "ftol_abs" = 1e-8)
 
-    # perform optimization
-    res <- nloptr(
-        x0 = encodeParam(mix = mix, param = param),
-        eval_f = function(x){
-         param_list <- decodeParam(x, intercept = FALSE)
-         mix <- param_list$mix
-         param <- param_list$param
-         return(
-           log(error(ts_input, ts_output, param, mix, log))
-         )},
-        lb = rep(0, length(mix) + length(param)),
-        opts = opts
-      )$solution %>%
-      decodeParam(intercept = FALSE)
-    mix <- res$mix
-    param <- res$param
+      # perform optimization
+      res <- nloptr(
+              x0 = encodeParam(mix = mix, param = param),
+              eval_f = function(x){
+               param_list <- decodeParam(x, intercept = FALSE)
+               mix <- param_list$mix
+               param <- param_list$param
+               return(
+                 log(error(ts_input, ts_output, param, mix, log)) # log for numerical stability
+               )},
+              lb = rep(0, length(mix) + length(param)),
+              opts = opts
+            )$solution %>%
+            decodeParam(intercept = FALSE)
+      mix <- res$mix
+      param <- res$param
 
-    # reorder windows by delta
-    if(nrow(param) > 1){
-      o <- order(param[,1])
-      param <- param[o,]
-      mix <- mix[o]
+      # reorder windows by delta
+      if(nrow(param) > 1){
+        o <- order(param[,1])
+        param <- param[o,]
+        mix <- mix[o]
+      }
+
+      r <- createSWR(mix = mix,
+                     param = param)
+      delta_bic <- c(delta_bic = BIC(r, ts_input = ts_input, ts_output = ts_output))
+      param_ <- append(param_, list(param))
+      mix_ <- append(mix_, list(mix))
     }
+
+    param <- param_[[which.min(delta_bic)]]
+    mix <- mix_[[which.min(delta_bic)]]
 
     # add parameter history entry
     param_hist <- append(param_hist, list(list(mix = mix, param = param)))
@@ -159,9 +178,9 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' @param ts_input a vector or ts object containing the input time series
 #' @param ts_output a vector or ts object (on the same time scale as ts_input) containing the target time series
 #' @param iter number of iterations (maximum number of windows)
-#' @param runs number of independent model runs
+#' @param runs `r lifecycle::badge("deprecated")` number of independent model runs; no longer supported due to deterministic window initialization
 #' @param log whether a log-linear model should be used
-#' @param parallel should the runs be computed in parallel? If FALSE, all runs are computed in serial. If TRUE, all runs are computed in parallel with a maximum number of cores. If a scalar is provided, the number of cores is set manually.
+#' @param parallel `r lifecycle::badge("deprecated")` should the runs be computed in parallel? If FALSE, all runs are computed in serial. If TRUE, all runs are computed in parallel with a maximum number of cores. If a scalar is provided, the number of cores is set manually. No longer supported for single-run models
 #' @param return either "best" (best model run is returned), or "all" (all model runs are returned)
 #' @param param_selection either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively
 #' @examples
@@ -176,9 +195,10 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' summary(mod)
 #' @import pbapply
 #' @import parallel
+#' @importFrom lifecycle deprecate_warn
 #' @export
-trainSWR <- function(ts_input, ts_output, iter = 10, runs = 10, log = FALSE,
-                  parallel = TRUE, return = "best", param_selection = "best_rmse"){
+trainSWR <- function(ts_input, ts_output, iter = 5, runs = 1, log = FALSE,
+                  parallel = FALSE, return = "best", param_selection = "best_rmse"){
 
   if(length(ts_input) != length(ts_output)){
     stop("Error: input and output must be vectors of the same lengths")
@@ -186,6 +206,22 @@ trainSWR <- function(ts_input, ts_output, iter = 10, runs = 10, log = FALSE,
 
   if(!(return %in% c("best", "all"))){
     return = "best"
+  }
+
+  if (!runs == 1) {
+    lifecycle::deprecate_warn(
+      when = "0.1.1",
+      what = "trainSWR(runs)",
+      details = "Multiple model runs are not useful with deterministic window initializations."
+    )
+  }
+
+  if (isFALSE(parallel) || parallel > 1) {
+    lifecycle::deprecate_warn(
+      when = "0.1.1",
+      what = "trainSWR(parallel)",
+      details = "Parallel model runs are not useful with deterministic window initializations."
+    )
   }
 
   # create list of runs to perform

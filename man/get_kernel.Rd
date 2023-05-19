@@ -32,7 +32,7 @@ plot_kernel(
 
 \item{weighted}{if TRUE, windows are weighted with mix parameters; default: TRUE}
 
-\item{object}{an `SWR` model object created using \link{trainSWR}}
+\item{object}{an \code{SWR} model object created using \link{trainSWR}}
 
 \item{...}{further plotting parameters, see  \link{plot_kernel} or \link{plot_prediction}, respectively}
 
@@ -42,7 +42,7 @@ plot_kernel(
 
 \item{include_text}{if TRUE, plots will be annotated}
 
-\item{x}{an `SWR` model object}
+\item{x}{an \code{SWR} model object}
 
 \item{type}{either "kernel" to produce a plot of the window kernels, or "prediction" to plot the model predictions, see \link{plot_prediction}}
 }
@@ -51,13 +51,13 @@ Return and plot the accumulated kernel, consisting of one or multiple windows
 }
 \section{Functions}{
 \itemize{
-\item \code{get_kernel()}: return the kernel of an `SWR` model
+\item \code{get_kernel()}: return the kernel of an \code{SWR} model
 
-\item \code{coef(SWR)}: return the kernel of an `SWR` model
+\item \code{coef(SWR)}: return the kernel of an \code{SWR} model
 
-\item \code{plot_kernel()}: plot the kernel of an `SWR` model
+\item \code{plot_kernel()}: plot the kernel of an \code{SWR} model
 
-\item \code{plot(SWR)}: plot the kernel of an `SWR` model
+\item \code{plot(SWR)}: plot the kernel of an \code{SWR} model
 
 }}
 \examples{

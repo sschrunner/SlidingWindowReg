@@ -7,10 +7,10 @@
 trainSWR(
   ts_input,
   ts_output,
-  iter = 10,
-  runs = 10,
+  iter = 5,
+  runs = 1,
   log = FALSE,
-  parallel = TRUE,
+  parallel = FALSE,
   return = "best",
   param_selection = "best_rmse"
 )
@@ -22,18 +22,18 @@ trainSWR(
 
 \item{iter}{number of iterations (maximum number of windows)}
 
-\item{runs}{number of independent model runs}
+\item{runs}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} number of independent model runs; no longer supported due to deterministic window initialization}
 
 \item{log}{whether a log-linear model should be used}
 
-\item{parallel}{should the runs be computed in parallel? If FALSE, all runs are computed in serial. If TRUE, all runs are computed in parallel with a maximum number of cores. If a scalar is provided, the number of cores is set manually.}
+\item{parallel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} should the runs be computed in parallel? If FALSE, all runs are computed in serial. If TRUE, all runs are computed in parallel with a maximum number of cores. If a scalar is provided, the number of cores is set manually. No longer supported for single-run models}
 
 \item{return}{either "best" (best model run is returned), or "all" (all model runs are returned)}
 
 \item{param_selection}{either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively}
 }
 \description{
-Trains an `SWR` model based on input and target time series data.
+Trains an \code{SWR} model based on input and target time series data.
 }
 \examples{
 # train a model based on one year of observations

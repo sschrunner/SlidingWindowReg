@@ -3,26 +3,26 @@
 \name{summary.SWR}
 \alias{summary.SWR}
 \alias{dim.SWR}
-\title{Summarizes an `SWR` model}
+\title{Summarizes an \code{SWR} model}
 \usage{
 \method{summary}{SWR}(object, ...)
 
 \method{dim}{SWR}(x)
 }
 \arguments{
-\item{object}{an `SWR` model object created using \link{trainSWR}}
+\item{object}{an \code{SWR} model object created using \link{trainSWR}}
 
 \item{...}{currently unused}
 
-\item{x}{an `SWR` model object created using \link{trainSWR}}
+\item{x}{an \code{SWR} model object created using \link{trainSWR}}
 }
 \description{
-A summary of an `SWR` model
+A summary of an \code{SWR} model
 }
 \section{Functions}{
 \itemize{
-\item \code{summary(SWR)}: Summarizes the `SWR` model
+\item \code{summary(SWR)}: Summarizes the \code{SWR} model
 
-\item \code{dim(SWR)}: Returns the number of windows of the `SWR` model
+\item \code{dim(SWR)}: Returns the number of windows of the \code{SWR} model
 
 }}

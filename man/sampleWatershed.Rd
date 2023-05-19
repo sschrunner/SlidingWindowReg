@@ -7,9 +7,9 @@
 \format{
 A data frame with 14245 rows and 3 columns:
 \describe{
-  \item{date}{date variable (daily measurements) between October 01, 1979 and September 30, 2018}
-  \item{rain}{daily cumulated rainfall}
-  \item{gauge}{daily cumulated, gauged watershed runoff}
+\item{date}{date variable (daily measurements) between October 01, 1979 and September 30, 2018}
+\item{rain}{daily cumulated rainfall}
+\item{gauge}{daily cumulated, gauged watershed runoff}
 }
 }
 \source{

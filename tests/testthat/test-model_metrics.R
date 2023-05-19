@@ -9,10 +9,10 @@ test_that("AIC and BIC", {
 
   expect_equal(AIC(mod,
                    ts_input = sampleWatershed[1:7000,]$rain,
-                   ts_output = sampleWatershed[1:7000,]$gauge), 38587.61, info = "number of regression parameters", tolerance = 5e-6)
+                   ts_output = sampleWatershed[1:7000,]$gauge), 38633.75, info = "number of regression parameters", tolerance = 5e-6)
   expect_equal(BIC(mod,
                    ts_input = sampleWatershed[1:7000,]$rain,
-                   ts_output = sampleWatershed[1:7000,]$gauge), 38628.73, info = "number of regression parameters", tolerance = 5e-6)
+                   ts_output = sampleWatershed[1:7000,]$gauge), 38674.87, info = "number of regression parameters", tolerance = 5e-6)
 })
 
 
@@ -26,6 +26,6 @@ test_that("RMSE and R2 score", {
                   parallel = FALSE)
   pred <- predict(mod,
                   newdata = sampleWatershed[7001:10000,]$rain)
-  expect_equal(rmse(pred, sampleWatershed[7001:10000,]$gauge), 3.444031, info = "number of regression parameters", tolerance = 5e-6)
-  expect_equal(r2(pred, sampleWatershed[7001:10000,]$gauge), 0.754129, info = "number of regression parameters", tolerance = 5e-6)
+  expect_equal(rmse(pred, sampleWatershed[7001:10000,]$gauge), 3.453326, info = "number of regression parameters", tolerance = 5e-6)
+  expect_equal(r2(pred, sampleWatershed[7001:10000,]$gauge), 0.7527995, info = "number of regression parameters", tolerance = 5e-6)
 })

@@ -2,7 +2,7 @@
 % Please edit documentation in R/createSWR.R
 \name{createSWR}
 \alias{createSWR}
-\title{Create `SWR` model object}
+\title{Create \code{SWR} model object}
 \usage{
 createSWR(param, mix)
 }
@@ -12,5 +12,5 @@ createSWR(param, mix)
 \item{mix}{a vector of mixing parameters (beta)}
 }
 \description{
-Constructor to create an `SWR` model object manually based on model parameters
+Constructor to create an \code{SWR} model object manually based on model parameters
 }

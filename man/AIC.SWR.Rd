@@ -10,7 +10,7 @@
 \method{BIC}{SWR}(object, ts_input, ts_output, ...)
 }
 \arguments{
-\item{object}{an `SWR` model object created using \link{trainSWR}}
+\item{object}{an \code{SWR} model object created using \link{trainSWR}}
 
 \item{ts_input}{a vector or ts object containing the input time series}
 
