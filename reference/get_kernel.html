@@ -60,7 +60,8 @@
 <span>  kernel_type <span class="op">=</span> <span class="st">"single"</span>,</span>
 <span>  weighted <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  xlim <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  include_text <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  include_text <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scales <span class="op">=</span> <span class="st">"fixed"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for SWR</span></span>
@@ -103,6 +104,10 @@
 
 <dt>include_text</dt>
 <dd><p>if TRUE, plots will be annotated</p></dd>
+
+
+<dt>scales</dt>
+<dd><p>whether scales should be shared across multiple sub-plots ("fixed"), or free ("free")</p></dd>
 
 
 <dt>x</dt>
