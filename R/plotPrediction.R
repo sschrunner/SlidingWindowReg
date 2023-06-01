@@ -121,6 +121,9 @@ plot_prediction <- function(prediction, reference, ts_input = NULL, scale = "yea
     theme(text = element_text(size = 25),
           axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
           legend.position = "top") +
+    scale_color_manual(values = c("input" = "blue",
+                                  "prediction" = "darkgreen",
+                                  "ground truth" = "darkgrey")) +
     ylab("value")
 
   return(p)

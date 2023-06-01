@@ -18,7 +18,8 @@ plot_kernel(
   kernel_type = "single",
   weighted = TRUE,
   xlim = NULL,
-  include_text = TRUE
+  include_text = TRUE,
+  scales = "fixed"
 )
 
 \method{plot}{SWR}(x, type = "kernel", ...)
@@ -41,6 +42,8 @@ plot_kernel(
 \item{xlim}{vector with lower / upper bound of the x axis to print the kernel}
 
 \item{include_text}{if TRUE, plots will be annotated}
+
+\item{scales}{whether scales should be shared across multiple sub-plots ("fixed"), or free ("free")}
 
 \item{x}{an \code{SWR} model object}
 

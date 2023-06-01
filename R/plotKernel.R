@@ -81,7 +81,7 @@ coef.SWR <- function(object, ...){
 #' @inheritParams plot_kernel
 #' @noRd
 plot_multiple_kernels <- function(list, rownames = NULL, kernel_type = "single", weighted = TRUE,
-                                  xlim = NULL, include_text = TRUE){
+                                  xlim = NULL, include_text = TRUE, scales = "fixed"){
 
   if(is.null(rownames)){
     if(is.null(names(list))){
@@ -142,7 +142,7 @@ plot_multiple_kernels <- function(list, rownames = NULL, kernel_type = "single",
     }
 
     if(length(unique(rownames)) > 1){
-      p <- p + facet_grid(rownames~.)
+      p <- p + facet_grid(rownames~., scales = scales)
     }
 
     # add formatting instructions
@@ -181,9 +181,11 @@ plot_multiple_kernels <- function(list, rownames = NULL, kernel_type = "single",
 #' @param list a list containing multiple trained SlidingWindowReg models
 #' @param xlim vector with lower / upper bound of the x axis to print the kernel
 #' @param include_text if TRUE, plots will be annotated
+#' @param scales whether scales should be shared across multiple sub-plots ("fixed"), or free ("free")
 #' @import ggplot2
 #' @export
-plot_kernel <- function(list = NULL, param = NULL, mix = NULL, kernel_type = "single", weighted = TRUE, xlim = NULL, include_text = TRUE){
+plot_kernel <- function(list = NULL, param = NULL, mix = NULL, kernel_type = "single",
+                        weighted = TRUE, xlim = NULL, include_text = TRUE, scales = "fixed"){
 
   if(is.null(list)){
     if(is.null(param)){
@@ -211,7 +213,8 @@ plot_kernel <- function(list = NULL, param = NULL, mix = NULL, kernel_type = "si
                           kernel_type = kernel_type,
                           weighted = weighted,
                           xlim = xlim,
-                          include_text = include_text)
+                          include_text = include_text,
+                          scales = scales)
   )
 }
 
