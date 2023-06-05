@@ -66,18 +66,21 @@
 <!-- badges: start -->
 
 <div class="section level2">
-<h2 id="a-sliding-multi-window-regression-model">A Sliding Multi-Window Regression Model<a class="anchor" aria-label="anchor" href="#a-sliding-multi-window-regression-model"></a>
+<h2 id="a-gaussian-sliding-windows-regression-model">A Gaussian Sliding Windows Regression Model<a class="anchor" aria-label="anchor" href="#a-gaussian-sliding-windows-regression-model"></a>
 </h2>
-<p>This R package presents a Sliding Multi-Window Regression model for hydrological inference. Given an input time series <span class="math inline"><em>x</em><sub><em>t</em></sub></span> (describing rainfall in a hydrological setting) and a time-dependent target variable <span class="math inline"><em>y</em><sub><em>t</em></sub></span> describing the gauged watershed runoff, the model is based on a set of <span class="math inline"><em>k</em></span> lagged window kernels modeling one component of the overall water runoff each. For instance, surface flow, characterized by short time lags, may be represented by window 1, while groundwater flow is described by a second window with longer time lag.</p>
-<p>Each window <span class="math inline"><em>i</em> ∈ {1, …, <em>k</em>}</span> is characterized by * a location parameter <span class="math inline"><em>δ</em><sub><em>i</em></sub></span> indicating the time lag, i.e. the distance between the window center and the estimated time point on the time axis, and * a size parameter <span class="math inline"><em>σ</em><sub><em>i</em></sub></span> defining the width <span class="math inline"><em>l</em><sub><em>i</em></sub></span> of the window. The predicted runoff associated with window <span class="math inline"><em>i</em></span> is computed as the rolling average of the input time series <span class="math inline"><em>x</em><sub><em>t</em></sub></span> with the window kernel parameters <span class="math inline"><em>κ</em><sub><em>i</em></sub></span> as weights, i.e. <span class="math inline"><em>κ</em><sub><em>i</em></sub><sup><em>T</em></sup><em>x</em><sub><em>S</em><sub><em>i</em></sub></sub></span>, where <span class="math inline"><em>S</em><sub><em>i</em></sub> = {<em>t</em> − <em>δ</em><sub><em>i</em></sub> − <em>l</em><sub><em>i</em></sub>, …, <em>t</em> − <em>δ</em><sub><em>i</em></sub> + <em>l</em><sub><em>i</em></sub>}</span> is the set of time lags <span class="math inline"><em>δ</em><sub><em>i</em></sub> − <em>l</em><sub><em>i</em></sub></span> to <span class="math inline"><em>δ</em><sub><em>i</em></sub> + <em>l</em><sub><em>i</em></sub></span>, and <span class="math inline"><em>x</em><sub><em>S</em><sub><em>i</em></sub></sub> = (<em>x</em><sub><em>t</em> − 1</sub>,…,<em>x</em><sub><em>t</em> − <em>l</em></sub>)</span> denotes the vector of lagged observations.</p>
-<p>The predicted output <span class="math inline"><em>y</em><sub><em>t</em></sub></span> is modeled as a multiple linear regression model</p>
-<p><span class="math display"><em>y</em><sub><em>t</em></sub> = <em>β</em><sub>1</sub>(<em>κ</em><sub>1</sub><sup><em>T</em></sup><em>x</em><sub><em>t</em></sub>) + <em>β</em><sub>2</sub>(<em>κ</em><sub>2</sub><sup><em>T</em></sup><em>x</em><sub><em>t</em></sub>) + … + <em>β</em><sub><em>k</em></sub>(<em>κ</em><sub><em>k</em></sub><sup><em>T</em></sup><em>x</em><sub><em>t</em></sub>) + <em>ε</em><sub><em>t</em></sub>,</span></p>
+<p>This R package presents a Sliding Windows Regression model with Gaussian kernels for hydrological inference, see <a href="https://arxiv.org/abs/2306.00453" class="external-link">Schrunner et al. (2023)</a>. Given an input time series <span class="math inline">(<em>x</em><sub><em>t</em></sub>)_<em>t</em> ∈ <em>T</em></span> (describing rainfall in a hydrological setting) and a time-dependent target variable <span class="math inline">(<em>y</em><sub><em>t</em></sub>)_<em>t</em> ∈ <em>T</em></span> describing the gauged watershed runoff, the model utilizes a set of <span class="math inline"><em>k</em></span> lagged time windows to model one water path each. For instance, surface flow, characterized by short time lags, may be represented by the first window, while groundwater flow is described by a second window with longer time lags.</p>
+<p>A lagged time window <span class="math inline"><em>W</em></span> is an interval on the time axis bounded by time lags <span class="math inline"><em>s</em><sub>min</sub> &lt; <em>s</em><sub>max</sub></span> relative to the current time point <span class="math inline"><em>t</em></span>, <span class="math display">$$W = \[t-s_{\max},t-s_{\min}\].$$</span> For simplicity, <span class="math inline"><em>W</em></span> is represented by its window center (location parameter) <span class="math inline">$\delta = \frac{s_{\min} + s_{\max}}{2}$</span> and the radius (size parameter) <span class="math inline">$l=\frac{s_{\max}-s_{\min}}{2}$</span>, rather than <span class="math inline"><em>s</em><sub>min</sub></span> and <span class="math inline"><em>s</em><sub>max</sub></span> (assuming even-numbered window lengths). For multiple windows <span class="math inline"><em>i</em> = 1, …, <em>k</em></span>, the parameters are given by * location parameters <span class="math inline"><em>δ</em><sub><em>i</em></sub></span> indicating the window centers on the time axis, i.e. the distance between the window center and the estimated time point on the time axis, and * size parameters <span class="math inline"><em>σ</em><sub><em>i</em></sub></span> defining the widths <span class="math inline"><em>l</em><sub><em>i</em></sub></span> of the windows.</p>
+<p>Given such a window <span class="math inline"><em>W</em><sub><em>i</em></sub></span>, we define a Gaussian kernel <span class="math inline"><em>κ</em><sup>(<em>i</em>)</sup></span> as a weight vector approximating the shape of a Gaussian probability density function <span class="math inline"><em>φ</em></span> with mean <span class="math inline"><em>μ</em> = <em>δ</em><sub><em>i</em></sub></span> and standard deviation <span class="math inline">$\sigma = \lceil\frac{l_i}{3}\rceil$</span>. The predicted runoff associated with window <span class="math inline"><em>i</em></span> is then computed as the convolution of the input time series <span class="math inline">(<em>x</em><sub><em>t</em></sub>)_<em>t</em> ∈ <em>T</em></span> with the window kernel <span class="math inline"><em>κ</em><sup>(<em>i</em>)</sup></span> as weight vector, i.e. <span class="math inline"><em>κ</em><sup>(<em>i</em>)</sup> * <em>x</em><sub><em>W</em><sub><em>i</em></sub></sub></span>, where <span class="math inline"><em>x</em><sub><em>W</em></sub> = (<em>x</em><sub><em>t</em> − <em>s</em><sub>max</sub></sub>,…,<em>x</em><sub><em>t</em> − <em>s</em><sub>min</sub></sub>)</span> denotes the vector of lagged observations and <span class="math inline">*</span> denotes the convolution operator.</p>
+<p>Overall, the predicted output <span class="math inline"><em>y</em><sub><em>t</em></sub></span> is modeled as a multiple linear regression model</p>
+<p><span class="math display">$$ y_t = \sum\limits_{i=1}^{k} \beta_i \left(\kappa^{(i)} \ast x_{W_i}\right) + \varepsilon_t, $$</span></p>
 <p>where <span class="math inline"><em>ε</em><sub><em>t</em></sub></span> denotes the model error.</p>
 </div>
 <div class="section level2">
 <h2 id="package-structure">Package structure<a class="anchor" aria-label="anchor" href="#package-structure"></a>
 </h2>
-<p>The core functionality of the package consists of a <tt>train</tt> and a <tt>predict</tt> function, respectively. Further, functions for evaluating and plotting model results and parameters are provided.</p>
+<p>The core functionality of the package consists of functions <tt>train</tt> and <tt>predict</tt>, which perform the model fitting and forecasting steps, respectively. Further, functions for evaluating and plotting model results and parameters are provided.</p>
+<p>The implementation builds on an S3 class <tt>SWR</tt>, which implements multiple generic functions, such as <tt>summary</tt>, <tt>plot</tt>, <tt>coef</tt>, <tt>dim</tt>, <tt>AIC</tt>, or <tt>BIC</tt>. Further, evaluation metrics can be computed using <tt>eval_all</tt>, which calls regression performance metrics <tt>rmse</tt> (root mean square error, RMSE), <tt>nrmse</tt> (normalized RMSE), <tt>r2</tt> (coefficient of determination), as well as hydrological metrics <tt>nse</tt> (Nash-Sutcliffe efficiency) and <tt>kge</tt> (Kling-Gupta efficientcy). Plots are provided for the kernel vectors <span class="math inline"><em>κ</em><sup>(<em>i</em>)</sup></span> via <tt>plot_kernel</tt>, as well as for the predictions using <tt>plot_prediction</tt>.</p>
+<p>A sample dataset <tt>sampleWatershed</tt> is contained in the package. The data originates from a real-world watershed in Cowichan, British Columbia, Canada and contains daily precipitation (input time series), as well as gauged runoff (output time series). Both time series cover a period of 39 hydrological years, starting on October 01, 1979.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -100,13 +103,32 @@
 <li>parallel,</li>
 <li>pbapply,</li>
 <li>rdist,</li>
-<li>stats</li>
+<li>stats,</li>
+<li>lifecycle</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>If you use <tt>SlidingWindowReg</tt> in a report or scientific publication, we would appreciate citations to the following preprint:</p>
+<p>Schrunner, S. et al. (2023). A Gaussian Sliding Windows Regression Model for Hydrological Inference. arXiv.org (preprint), 2023, <a href="https://doi.org/10.48550/arXiv.2306.00453" class="external-link uri">https://doi.org/10.48550/arXiv.2306.00453</a></p>
+<p>Bibtex entry:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="sc">@</span>misc{schrunner2023gaussian,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  title<span class="ot">=</span>{A Gaussian Sliding Windows Regression Model <span class="cf">for</span> Hydrological Inference}, </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  author<span class="ot">=</span>{Stefan Schrunner and Joseph Janssen and Anna Jenul and Jiguo Cao and Ali A. Ameli and William J. Welch},</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  year<span class="ot">=</span>{<span class="dv">2023</span>},</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  howpublished<span class="ot">=</span>{<span class="fu">arXiv.org</span> (preprint)},</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  eprint<span class="ot">=</span>{<span class="fl">2306.00453</span>},</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  archivePrefix<span class="ot">=</span>{arXiv},</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  primaryClass<span class="ot">=</span>{stat.ME},</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  doi<span class="ot">=</span>{<span class="fl">10.48550</span><span class="sc">/</span>arXiv.<span class="fl">2306.00453</span>},</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  url<span class="ot">=</span>{https<span class="sc">:</span><span class="er">//</span>doi.org<span class="sc">/</span><span class="fl">10.48550</span><span class="sc">/</span>arXiv.<span class="fl">2306.00453</span>}</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  }</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="contact">Contact<a class="anchor" aria-label="anchor" href="#contact"></a>
 </h2>
-<p>The implemented method was developed in collaboration between</p>
+<p>The implemented Gaussian Sliding Windows Regression model was developed in collaboration between</p>
 <ul>
 <li>Norwegian University of Life Sciences (NMBU), Ås, Norway,</li>
 <li>University of British Columbia (UBC), Vancouver, Canada, and</li>
