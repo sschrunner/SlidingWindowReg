@@ -7,17 +7,22 @@
 
 This R package presents a Sliding Windows Regression model with Gaussian kernels for hydrological inference, see [Schrunner et al. (2023)](https://arxiv.org/abs/2306.00453). Given an input time series $(x_t)\_{t \in T}$ (describing rainfall in a hydrological setting) and a time-dependent target variable $(y_t)\_{t \in T}$ describing the gauged watershed runoff, the model utilizes a set of $k$ lagged time windows to model one water path each. For instance, surface flow, characterized by short time lags, may be represented by the first window, while groundwater flow is described by a second window with longer time lags.
 
-A lagged time window $W$ is an interval on the time axis bounded by time lags $s_{\min} < s_{\max}$ relative to the current time point $t$, $$W = \[t-s_{\max},t-s_{\min}\].$$ For simplicity, $W$ is represented by its window center (location parameter) $\delta = \frac{s_{\min} + s_{\max}}{2}$ and the radius (size parameter) $l=\frac{s_{\max}-s_{\min}}{2}$, rather than $s_{\min}$ and $s_{\max}$ (assuming even-numbered window lengths). For multiple windows $i=1,\dots,k$, the parameters are given by
-* location parameters $\delta_i$ indicating the window centers on the time axis, i.e. the distance between the window center and the estimated time point on the time axis, and
-* size parameters $\sigma_i$ defining the widths $l_i$ of the windows.
+A lagged time window $W$ is an interval on the time axis bounded by time lags $s_{\min} < s_{\max}$ relative to the current time point $t$, 
 
-Given such a window $W_i$, we define a Gaussian kernel $\kappa^{(i)}$ as a weight vector approximating the shape of a Gaussian probability density function $\varphi$ with mean $\mu=\delta_i$ and standard deviation $\sigma = \lceil\frac{l_i}{3}\rceil$. The predicted runoff associated with window $i$ is then computed as the convolution of the input time series $\left(x_t\right)\_{t\in T}$ with the window kernel $\kappa^{(i)}$ as weight vector, i.e. $\kappa^{(i)} \ast x_{W_i}$, where  $x_W = (x_{t-s_{\max}},\dots,x_{t-s_{\min}})$ denotes the vector of lagged observations and $\ast$ denotes the convolution operator.
+$$W = [t-s_{\max},t-s_{\min}].$$ 
+
+Instead of $s_{\min}$ and $s_{\max}$, $W$ is represented by the following parameters for simplicity:
+
+* a location parameter $$\delta = \frac{s_{\min} + s_{\max}}{2}$$ indicating the window center on the time axis, i.e. the distance between the window center and the estimated time point on the time axis, and
+* a size parameter $$\sigma = \lceil \frac{s_{\max}-s_{\min}}{6} \rceil$$ defining the width of the window.
+
+Given such a window $W_i$, we define a Gaussian kernel $\kappa^{(i)}$ as a weight vector approximating the shape of a Gaussian probability density function $\varphi$ with mean $\mu=\delta_i$ and standard deviation $\sigma$. The predicted runoff associated with window $i$ is then computed as the convolution of the input time series $\left(x_t\right)\_{t\in T}$ with the window kernel $\kappa^{(i)}$ as weight vector, i.e. $\kappa^{(i)} \ast x_{W_i}$, where  $x_W = (x_{t-s_{\max}},\dots,x_{t-s_{\min}})$ denotes the vector of lagged observations and $\ast$ denotes the convolution operator.
 
 Overall, the predicted output $y_t$ is modeled as a multiple linear regression model 
 
 $$ y_t = \sum\limits_{i=1}^{k} \beta_i \left(\kappa^{(i)} \ast x_{W_i}\right) + \varepsilon_t, $$ 
 
-where $\varepsilon_t$ denotes the model error.
+where $\varepsilon_t$ denotes the model error. Due to practical considerations, we restrict regression parameters $\beta_1,\dots,\beta_k$ to non-negative numbers.
 
 ## Package structure
 
