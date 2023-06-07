@@ -60,9 +60,7 @@ build_gaussian_kernel <- function(param){
 #' @title Predict target variable
 #' @description predicts the target variable given a time series of inputs, and trained parameters
 #' @param ts a vector or ts object of new model inputs to predict
-#' @param mix a vector of mixing parameters (beta)
-#' @param param a matrix with 2 columns representing one window per row. The first column contains location parameters delta, the second column contains the standard deviation sigma.
-#' @param log whether a log-linear model should be used
+#' @inheritParams createSWR
 #' @param ... currently unused
 #' @noRd
 predict_target <- function(ts, mix, param, log = FALSE, ...){
@@ -95,7 +93,7 @@ predict_target <- function(ts, mix, param, log = FALSE, ...){
 }
 
 #' @title Predict target variable
-#' @description predicts the target variable given a time series of inputs, and trained parameters
+#' @description Predicts the output time series given an input time series using a trained `SWR` model object.
 #' @param object an `SWR` model object created using \link{trainSWR}
 #' @param newdata a vector or ts object of new model inputs to predict
 #' @param ... currently unused

@@ -1,9 +1,10 @@
 #' @title Information Criteria
-#' @description Computes Akaike's Information Criterion (AIC) and Bayesian Information Criterion (BIC).
+#' @description Computes Akaike's Information Criterion (AIC) \insertCite{akaike1974aic}{SlidingWindowReg} and Bayesian Information Criterion (BIC) \insertCite{schwarz1978bic}{SlidingWindowReg}.
 #' @describeIn AIC.SWR Akaike's Information Criterion
 #' @inheritParams summary.SWR
 #' @inheritParams trainSWR
 #' @return AIC or BIC value
+#' @references \insertAllCited{}
 #' @importFrom stats AIC
 #' @importFrom methods is
 #' @export

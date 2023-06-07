@@ -22,7 +22,7 @@
 AIC or BIC value
 }
 \description{
-Computes Akaike's Information Criterion (AIC) and Bayesian Information Criterion (BIC).
+Computes Akaike's Information Criterion (AIC) \insertCite{akaike1974aic}{SlidingWindowReg} and Bayesian Information Criterion (BIC) \insertCite{schwarz1978bic}{SlidingWindowReg}.
 }
 \section{Functions}{
 \itemize{
@@ -31,3 +31,6 @@ Computes Akaike's Information Criterion (AIC) and Bayesian Information Criterion
 \item \code{BIC(SWR)}: Bayesian Information Criterion
 
 }}
+\references{
+\insertAllCited{}
+}

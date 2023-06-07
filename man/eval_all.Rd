@@ -27,7 +27,14 @@ kge(prediction, reference)
 \item{reference}{a vector or ts object (on the same time scale as prediction) containing ground truth values}
 }
 \description{
-computes all evaluation metrics given a prediction and a reference vector
+computes all evaluation metrics given a prediction and a reference vector. The functionality includes general regression metrics and hydrological metrics (wrapper to \insertCite{bigiarini2020hydroGOF}{SlidingWindowReg}):
+\itemize{
+\item Root Mean Square Error (RMSE)
+\item Normalized Root Mean Square Error (NRMSE)
+\item Coefficient of Determination (R2)
+\item Nash-Sutcliffe Efficiency \insertCite{nash1970nsc}{SlidingWindowReg}
+\item Kling-Gupta Efficiency \insertCite{gupta2009kge}{SlidingWindowReg}
+}
 }
 \section{Functions}{
 \itemize{
@@ -42,8 +49,9 @@ computes all evaluation metrics given a prediction and a reference vector
 \item \code{kge()}: Kling-Gupta Efficiency
 
 }}
+\references{
+\insertAllCited{}
+}
 \seealso{
-\link[hydroGOF]{NSE}
-
-\link[hydroGOF]{KGE}
+\link[hydroGOF]{hydroGOF}
 }

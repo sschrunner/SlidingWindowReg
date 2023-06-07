@@ -8,9 +8,9 @@ trainSWR(
   ts_input,
   ts_output,
   iter = 5,
-  runs = 1,
+  runs,
   log = FALSE,
-  parallel = FALSE,
+  parallel,
   return = "best",
   param_selection = "best_rmse"
 )
@@ -35,14 +35,27 @@ trainSWR(
 \description{
 Trains an \code{SWR} model based on input and target time series data.
 }
+\details{
+The training procedure implements an iterative algorithm described in \insertCite{schrunner2023gaussian}{SlidingWindowReg}. A new window is added in each iteration, hence the number of windows equals to the iteration counter.
+Input and output time series are provided in \code{ts_input} and \code{ts_output}, respectively. Both are required to have equal lengths.
+The optimization is performed using the BOBYQA algorithm \insertCite{powell2009bobyqa}{SlidingWindowReg}, implemented in \code{nloptr} \insertCite{nloptr}{SlidingWindowReg}. As training hyperparameter, \code{iter} indicates the number of iterations, which equals to the maximum number of windows selected by the model.
+Parameters \code{return} and \code{param_selection} indicate which criterion should be used to determine the number of windows; option are: \code{return="all"} (no hyperparameter selection) or \code{return="best"}, which allows one of the following options:
+\itemize{
+\item \code{param_selection="best_aic"}: select model with highest AIC,
+\item \code{param_selection="best_bic"}: select model with highest BIC,
+\item \code{param_selection="best_rmse"}: select model with lowest RMSE.
+Arguments \code{runs}, \code{parallel} are deprecated and should not be used.
+}
+}
 \examples{
 # train a model based on one year of observations
 set.seed(42)
 data(sampleWatershed)
 mod <- trainSWR(sampleWatershed$rain[1:365],
                 sampleWatershed$gauge[1:365],
-                iter = 2,
-                runs = 1,
-                parallel = FALSE)
+                iter = 2)
 summary(mod)
+}
+\references{
+\insertAllCited{}
 }

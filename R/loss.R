@@ -1,9 +1,14 @@
 #' @title Compute all available model metrics
-#' @description computes all evaluation metrics given a prediction and a reference vector
+#' @description computes all evaluation metrics given a prediction and a reference vector. The functionality includes general regression metrics and hydrological metrics (wrapper to \insertCite{bigiarini2020hydroGOF}{SlidingWindowReg}):
+#' - Root Mean Square Error (RMSE)
+#' - Normalized Root Mean Square Error (NRMSE)
+#' - Coefficient of Determination (R2)
+#' - Nash-Sutcliffe Efficiency \insertCite{nash1970nsc}{SlidingWindowReg}
+#' - Kling-Gupta Efficiency \insertCite{gupta2009kge}{SlidingWindowReg}
 #' @param prediction a vector or ts object of predicted values
 #' @param reference a vector or ts object (on the same time scale as prediction) containing ground truth values
-#' @seealso \link[hydroGOF]{NSE}
-#' @seealso \link[hydroGOF]{KGE}
+#' @seealso \link[hydroGOF]{hydroGOF}
+#' @references \insertAllCited{}
 #' @export
 eval_all <- function(prediction, reference){
   res <- data.frame(

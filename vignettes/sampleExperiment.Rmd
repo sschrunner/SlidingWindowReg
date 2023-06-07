@@ -44,20 +44,18 @@ Given the data splits, we train the <tt>SlidingWindowReg</tt> model on the train
 
 ## Model training
 
-In the presented example, we use 3 iterations (up to 3 windows), 1 run, and determine the hyperparameter (number of windows $k$) with respect to the Bayesian Information Criterion (BIC). Further, we set the parallelization procedure to <tt>FALSE</tt>.
+In the presented example, we use 3 iterations (up to 3 windows), and determine the hyperparameter (number of windows $k$) with respect to the Bayesian Information Criterion (BIC).% Further, we set the parallelization procedure to <tt>FALSE</tt>.
 
 ```{r execute}
 mod <- trainSWR(sampleWatershed$rain[train_inds],
                 sampleWatershed$gauge[train_inds],
                 iter = 3,
-                runs = 1,
-                parallel = FALSE,
                 param_selection = "best_bic")
 ```
 
-## Parallelization
+%## Parallelization
 
-Model parallelization is implemented between the model runs, while iterations (incrementally adding windows in each iterations) run in a serial order. Hence, the option <tt>parallel = FALSE</tt> should be chosen if <tt>runs = 1</tt>. In case of multiple model runs, <tt>parallel</tt> can be set to either <tt>TRUE</tt> (in this case, the number of available kernels is determined automatically), or to a positive integer number indicating the number of kernels to be used.
+%Model parallelization is implemented between the model runs, while iterations (incrementally adding windows in each iterations) run in a %serial order. Hence, the option <tt>parallel = FALSE</tt> should be chosen if <tt>runs = 1</tt>. In case of multiple model runs, %<tt>parallel</tt> can be set to either <tt>TRUE</tt> (in this case, the number of available kernels is determined automatically), or to a %positive integer number indicating the number of kernels to be used.
 
 # Evaluation
 

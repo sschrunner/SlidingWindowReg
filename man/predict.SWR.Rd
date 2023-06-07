@@ -14,5 +14,5 @@
 \item{...}{currently unused}
 }
 \description{
-predicts the target variable given a time series of inputs, and trained parameters
+Predicts the output time series given an input time series using a trained \code{SWR} model object.
 }

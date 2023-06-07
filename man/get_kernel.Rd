@@ -25,9 +25,9 @@ plot_kernel(
 \method{plot}{SWR}(x, type = "kernel", ...)
 }
 \arguments{
-\item{param}{a matrix with 2 columns representing one window per row. The first column contains location parameters delta, the second column contains the standard deviation sigma.}
+\item{param}{a matrix with 2 columns, see details}
 
-\item{mix}{a vector of mixing parameters (beta)}
+\item{mix}{a vector of mixing parameters (beta), see details}
 
 \item{kernel_type}{a String indicating whether (a) all single windows (option: "single"), or (b) the combined kernel (option "combined")}
 

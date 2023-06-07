@@ -4,15 +4,26 @@
 \alias{createSWR}
 \title{Create \code{SWR} model object}
 \usage{
-createSWR(list = NULL, param = NULL, mix = NULL)
+createSWR(list = NULL, param = NULL, mix = NULL, ...)
 }
 \arguments{
 \item{list}{a list object to be converted to an \code{SWR} model object}
 
-\item{param}{a matrix with 2 columns representing one window per row. The first column contains location parameters delta, the second column contains the standard deviation sigma.}
+\item{param}{a matrix with 2 columns, see details}
 
-\item{mix}{a vector of mixing parameters (beta)}
+\item{mix}{a vector of mixing parameters (beta), see details}
+
+\item{...}{further variables to be appended to the \code{SWR} model object}
 }
 \description{
 Constructor to create an \code{SWR} model object manually based on model parameters
+}
+\details{
+An \code{SWR} model object is an S3-class object, which contains at least two variables:
+\itemize{
+\item a matrix \code{param} with 2 columns representing one window per row. The first column contains location parameters delta (>=0), the second column contains the standard deviation sigma (>0),
+\item a vector \code{mix} of regression parameters, representing one window each.
+Thus, the number of windows is given by the number of rows in \code{param}, as well as by the number of elements in \code{mix}.
+Additional variables can be appended to the \code{SWR} model object by using the \code{...} argument
+}
 }
