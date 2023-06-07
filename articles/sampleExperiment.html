@@ -129,16 +129,14 @@ windows</li>
 <div class="section level3">
 <h3 id="model-training">Model training<a class="anchor" aria-label="anchor" href="#model-training"></a>
 </h3>
-<p>In the presented example, we use 3 iterations (up to 3 windows), 1
-run, and determine the hyperparameter (number of windows <span class="math inline">\(k\)</span>) with respect to the Bayesian
-Information Criterion (BIC). Further, we set the parallelization
+<p>In the presented example, we use 3 iterations (up to 3 windows), and
+determine the hyperparameter (number of windows <span class="math inline">\(k\)</span>) with respect to the Bayesian
+Information Criterion (BIC).% Further, we set the parallelization
 procedure to <tt>FALSE</tt>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trainSWR.html">trainSWR</a></span><span class="op">(</span><span class="va">sampleWatershed</span><span class="op">$</span><span class="va">rain</span><span class="op">[</span><span class="va">train_inds</span><span class="op">]</span>,</span>
 <span>                <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">gauge</span><span class="op">[</span><span class="va">train_inds</span><span class="op">]</span>,</span>
 <span>                iter <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>                runs <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>                parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                param_selection <span class="op">=</span> <span class="st">"best_bic"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: The `parallel` argument of `trainSWR()` is deprecated as of SlidingWindowReg</span></span>
 <span><span class="co">## 0.1.1.</span></span>
@@ -146,17 +144,15 @@ procedure to <tt>FALSE</tt>.</p>
 <span><span class="co">## <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
 <span><span class="co">## <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
 <span><span class="co">## <span style="color: #555555;">generated.</span></span></span></code></pre>
-</div>
-<div class="section level3">
-<h3 id="parallelization">Parallelization<a class="anchor" aria-label="anchor" href="#parallelization"></a>
-</h3>
-<p>Model parallelization is implemented between the model runs, while
+<p>%## Parallelization</p>
+<p>%Model parallelization is implemented between the model runs, while
 iterations (incrementally adding windows in each iterations) run in a
-serial order. Hence, the option <tt>parallel = FALSE</tt> should be
+%serial order. Hence, the option <tt>parallel = FALSE</tt> should be
 chosen if <tt>runs = 1</tt>. In case of multiple model runs,
-<tt>parallel</tt> can be set to either <tt>TRUE</tt> (in this case, the
+%<tt>parallel</tt> can be set to either <tt>TRUE</tt> (in this case, the
 number of available kernels is determined automatically), or to a
-positive integer number indicating the number of kernels to be used.</p>
+%positive integer number indicating the number of kernels to be
+used.</p>
 </div>
 </div>
 <div class="section level2">

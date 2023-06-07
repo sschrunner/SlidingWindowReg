@@ -52,9 +52,9 @@
 <span>  <span class="va">ts_input</span>,</span>
 <span>  <span class="va">ts_output</span>,</span>
 <span>  iter <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  runs <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">runs</span>,</span>
 <span>  log <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">parallel</span>,</span>
 <span>  return <span class="op">=</span> <span class="st">"best"</span>,</span>
 <span>  param_selection <span class="op">=</span> <span class="st">"best_rmse"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -94,6 +94,30 @@
 <dd><p>either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The training procedure implements an iterative algorithm described in (Schrunner et al. 2023)
+. A new window is added in each iteration, hence the number of windows equals to the iteration counter.
+Input and output time series are provided in <code>ts_input</code> and <code>ts_output</code>, respectively. Both are required to have equal lengths.
+The optimization is performed using the BOBYQA algorithm (Powell 2009)
+, implemented in <code>nloptr</code> (Johnson 2021)
+. As training hyperparameter, <code>iter</code> indicates the number of iterations, which equals to the maximum number of windows selected by the model.
+Parameters <code>return</code> and <code>param_selection</code> indicate which criterion should be used to determine the number of windows; option are: <code>return="all"</code> (no hyperparameter selection) or <code>return="best"</code>, which allows one of the following options:</p><ul><li><p><code>param_selection="best_aic"</code>: select model with highest AIC,</p></li>
+<li><p><code>param_selection="best_bic"</code>: select model with highest BIC,</p></li>
+<li><p><code>param_selection="best_rmse"</code>: select model with lowest RMSE.
+Arguments <code>runs</code>, <code>parallel</code> are deprecated and should not be used.</p></li>
+</ul></div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Johnson SG (2021).
+<em>The NLopt nonlinear-optimization package</em>.
+v2.7.1, <a href="http://github.com/stevengj/nlopt" class="external-link">http://github.com/stevengj/nlopt</a>.<br><br> Powell MJ (2009).
+“The BOBYQA algorithm for bound constrained optimization without derivatives.”
+<em>Cambridge NA Report NA2009/06, University of Cambridge, Cambridge</em>, <b>26</b>.<br><br> Schrunner S, Janssen J, Jenul A, Cao J, Ameli AA, Welch WJ (2023).
+“A Gaussian Sliding Windows Regression Model for Hydrological Inference.”
+arXiv.org (preprint).
+2306.00453.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -102,9 +126,7 @@
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">sampleWatershed</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">trainSWR</span><span class="op">(</span><span class="va">sampleWatershed</span><span class="op">$</span><span class="va">rain</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">365</span><span class="op">]</span>,</span></span>
 <span class="r-in"><span>                <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">gauge</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">365</span><span class="op">]</span>,</span></span>
-<span class="r-in"><span>                iter <span class="op">=</span> <span class="fl">2</span>,</span></span>
-<span class="r-in"><span>                runs <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>                parallel <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                iter <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The `parallel` argument of `trainSWR()` is deprecated as of SlidingWindowReg</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> 0.1.1.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Parallel model runs are not useful with deterministic window initializations.</span>
