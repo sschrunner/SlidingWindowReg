@@ -4,9 +4,11 @@
 \alias{createSWR}
 \title{Create \code{SWR} model object}
 \usage{
-createSWR(param, mix)
+createSWR(list = NULL, param = NULL, mix = NULL)
 }
 \arguments{
+\item{list}{a list object to be converted to an \code{SWR} model object}
+
 \item{param}{a matrix with 2 columns representing one window per row. The first column contains location parameters delta, the second column contains the standard deviation sigma.}
 
 \item{mix}{a vector of mixing parameters (beta)}
