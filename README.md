@@ -51,6 +51,7 @@ This version of the R package can be installed as follows:
 - parallel,
 - pbapply,
 - rdist,
+- Rdpack (>= 0.7),
 - stats,
 - lifecycle
 
