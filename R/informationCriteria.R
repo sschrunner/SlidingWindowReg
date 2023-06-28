@@ -16,7 +16,7 @@ AIC.SWR <- function(object, ts_input, ts_output, ...){
 
   lik <- loglik(predict(object, newdata = ts_input),
                 ts_output)
-  return(-2 * lik + 6 * dim(object) )
+  return(-2 * lik + 6 * dim(object) ) # -2 * loglik + 2 k
 }
 
 #' @describeIn AIC.SWR Bayesian Information Criterion
@@ -31,7 +31,7 @@ BIC.SWR <- function(object, ts_input, ts_output, ...){
 
   lik <- loglik(predict(object, newdata = ts_input),
                 ts_output)
-  return(-2 * lik + log(length(ts_input)) * 3 * dim(object))
+  return(-2 * lik + log(length(ts_input)) * 3 * dim(object)) # -2 * loglik + k * log(n)
 }
 
 #' @describeIn AIC.SWR log-likelihood function
@@ -39,8 +39,6 @@ BIC.SWR <- function(object, ts_input, ts_output, ...){
 #' @noRd
 loglik <- function(prediction, reference){
   rss <- sum((reference - prediction)^2)
-  n <- length(rss)
+  n <- length(prediction)
   return(-n/2 * (log(2*pi) + log(rss/n) + 1))
-  #sigmasq <- var(resid, na.rm = TRUE)
-  #return( - abs(sum(!is.na(resid))) * log(sqrt(2 * pi * sigmasq)) - sum((resid)^2, na.rm = TRUE) / (2 * sigmasq))
 }

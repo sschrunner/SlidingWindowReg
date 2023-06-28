@@ -75,7 +75,9 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
       delta_opts <- c(#0, # minimum point - 1
                       min(param[,1]) / 2,
                       param[-nrow(param),1] + diff(param[,1]) / 2, # center point between kernels
-                      max(param[,1] + 5)
+                      max(param[,1] + 1),
+                      max(param[,1] + 5),
+                      max(param[,1] + 10)
                       )
       mix_new <- sum(mix) * c(mix / (sum(mix) + 1), 1 / (sum(mix) + 1) )
       sigma_new <- rep(1, i)#c(param[,2], 1)
@@ -212,7 +214,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' @importFrom lifecycle deprecate_warn
 #' @export
 trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
-                  parallel, return = "best", param_selection = "best_aic"){
+                  parallel, return = "best", param_selection = "best_bic"){
 
   if(length(ts_input) != length(ts_output)){
     stop("Error: input and output must be vectors of the same lengths")
