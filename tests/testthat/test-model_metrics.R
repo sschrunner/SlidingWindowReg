@@ -6,10 +6,10 @@ test_that("AIC and BIC", {
 
   expect_equal(AIC(mod,
                    ts_input = sampleWatershed[1:7000,]$rain,
-                   ts_output = sampleWatershed[1:7000,]$gauge), 40124.8, info = "number of regression parameters", tolerance = 5e-6)
+                   ts_output = sampleWatershed[1:7000,]$gauge), 40124.6, info = "number of regression parameters", tolerance = 5e-6)
   expect_equal(BIC(mod,
                    ts_input = sampleWatershed[1:7000,]$rain,
-                   ts_output = sampleWatershed[1:7000,]$gauge), 40165.92, info = "number of regression parameters", tolerance = 5e-6)
+                   ts_output = sampleWatershed[1:7000,]$gauge), 40165.72, info = "number of regression parameters", tolerance = 5e-6)
 })
 
 

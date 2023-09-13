@@ -12,7 +12,7 @@ trainSWR(
   log = FALSE,
   parallel,
   return = "best",
-  param_selection = "best_aic"
+  param_selection = "best_bic"
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ trainSWR(
 
 \item{parallel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} should the runs be computed in parallel? If FALSE, all runs are computed in serial. If TRUE, all runs are computed in parallel with a maximum number of cores. If a scalar is provided, the number of cores is set manually. No longer supported for single-run models}
 
-\item{return}{either "best" (best model run is returned), or "all" (all model runs are returned)}
+\item{return}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} either "best" (best model run is returned), or "all" (all model runs are returned)}
 
 \item{param_selection}{either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively}
 }

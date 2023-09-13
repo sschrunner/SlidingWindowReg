@@ -72,16 +72,14 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 
     # heuristic initialization
     if(i > 1){
-      delta_opts <- c(#0, # minimum point - 1
-                      min(param[,1]) / 2,
+      delta_opts <- c(min(param[,1]) / 2,
                       param[-nrow(param),1] + diff(param[,1]) / 2, # center point between kernels
                       max(param[,1] + 1),
                       max(param[,1] + 5),
                       max(param[,1] + 10)
                       )
       mix_new <- sum(mix) * c(mix / (sum(mix) + 1), 1 / (sum(mix) + 1) )
-      sigma_new <- rep(1, i)#c(param[,2], 1)
-        #rep(sum(param[,2]) / i, i) # use previous sigma and distribute upon i windows
+      sigma_new <- rep(1, i)
     }
     else{
       delta_opts = 1
@@ -103,7 +101,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
                    "xtol_rel" = 0,
                    "ftol_rel" = 0,
                    "xtol_abs" = 0,
-                   "ftol_abs" = 1e-8,
+                   "ftol_abs" = 1e-3,
                    "maxeval" = 1e4)
 
       # perform optimization
@@ -114,7 +112,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
                mix <- param_list$mix
                param <- param_list$param
                return(
-                 log(error(ts_input, ts_output, param, mix, log)) # log for numerical stability
+                 error(ts_input, ts_output, param, mix, log)
                )},
               lb = rep(0, length(mix) + length(param)),
               opts = opts
@@ -171,9 +169,6 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
   else{
     stop("param_selection method unknown!")
   }
-  #mix <- param_hist[[best_ind]]$mix
-  #param <- param_hist[[best_ind]]$param
-  #train_metrics <- train_hist[best_ind,-1]
 
   return(createSWR(param_hist[[best_ind]],
                    train_hist = train_hist,
@@ -198,7 +193,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' @param runs `r lifecycle::badge("deprecated")` number of independent model runs; no longer supported due to deterministic window initialization
 #' @param log whether a log-linear model should be used
 #' @param parallel `r lifecycle::badge("deprecated")` should the runs be computed in parallel? If FALSE, all runs are computed in serial. If TRUE, all runs are computed in parallel with a maximum number of cores. If a scalar is provided, the number of cores is set manually. No longer supported for single-run models
-#' @param return either "best" (best model run is returned), or "all" (all model runs are returned)
+#' @param return `r lifecycle::badge("deprecated")` either "best" (best model run is returned), or "all" (all model runs are returned)
 #' @param param_selection either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively
 #' @examples
 #' # train a model based on one year of observations
@@ -220,10 +215,6 @@ trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
     stop("Error: input and output must be vectors of the same lengths")
   }
 
-  if(!(return %in% c("best", "all"))){
-    return = "best"
-  }
-
   if (exists("runs")) {
     lifecycle::deprecate_warn(
       when = "0.1.1",
@@ -240,79 +231,62 @@ trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
     )
   }
 
-  # create list of runs to perform
-  #init_list <- 1 : runs # parameter list
+  if (exists("return")) {
+    lifecycle::deprecate_warn(
+      when = "0.1.1",
+      what = "trainSWR(return)",
+      details = "Return argument is unused."
+    )
+  }
 
-  # train models
-  # if(parallel == TRUE || is.numeric(parallel)){
-  #   # initialize cluster
-  #   if(is.numeric(parallel)){
-  #     n_cores = min(parallel, parallel::detectCores() - 1)
-  #   }
-  #   else{
-  #     n_cores = parallel::detectCores() - 1
-  #   }
-  #   cl <- parallel::makeCluster(n_cores)
-  #   clusterExport(cl, list("ts_input", "ts_output", "log", "iter", "param_selection"), envir = environment())
-  #   clusterExport(cl, list("error"), envir = environment())
-  #
-  #   # run computation
-  #   res <- pbapply::pbreplicate(runs,
-  #                               train_inc(
-  #                                 ts_input = ts_input,
-  #                                 ts_output = ts_output,
-  #                                 iter = iter,
-  #                                 log = log,
-  #                                 param_selection = param_selection),
-  #                               simplify = FALSE,
-  #                               cl = cl)
-  #
-  #   # close cluster
-  #   parallel::stopCluster(cl)
-  # } else {
-  #   # run computation
-  runs <- 1
-  res <- pbapply::pbreplicate(runs,
-                                train_inc(
-                                  ts_input = ts_input,
-                                  ts_output = ts_output,
-                                  iter = iter,
-                                  log = log,
-                                  param_selection = param_selection),
-                                simplify = FALSE)
-  #}
+  res <- train_inc(ts_input = ts_input,
+                   ts_output = ts_output,
+                   iter = iter,
+                   log = log,
+                   param_selection = param_selection)
 
   # add fitted & residuals to list objects
-  res <- lapply(1:length(res), function(x){
-    r <- res[[x]]
-    r$fitted <- predict_target(ts_input, r$mix, r$param)
-    r$residuals <- ts_output - r$fitted
-    return(r)})
+  res$fitted <- predict_target(ts_input, res$mix, res$param)
+  res$residuals <- ts_output - res$fitted
 
-  # reshape as array
-  dim(res) <- runs
-  names(res) <- paste("run",1:runs)
+  return(res)
+}
 
-  if(return == "all"){
-    return(res)
+#' @title Cochrane-Orcutt procedure
+#' @description Cochrane-Orcutt procedure to resolve auto-correlated residuals in `SWR` models.
+#' @details
+#' If an `SWR` model has auto-correlated residuals, the Cochrane-Orcutt procedure can be used to transform the data, such that auto-correlations are removed.
+#' Afterwards, the `SWR` model is retrained on the transformed data. For details, see \insertCite{schrunner2023gaussian}{SlidingWindowReg}.
+#' @inheritParams trainSWR
+#' @param model an `SWR` model
+#' @param ar number of autoregressive lags
+#' @param ... parameters for re-training the model using \link{trainSWR}
+#' @importFrom stats arima
+#' @importFrom stats na.omit
+#' @export
+cochrane_orcutt <- function(model, ts_input, ts_output, ar = 1, ...){
+  if(ar < 1){
+    stop("ar parameter cannot be smaller than 1")
   }
-  else{
-    if(param_selection == "best_rmse" || param_selection == "max"){
-      best_ind <- which.min(
-        sapply(res, function(x){return(x$train_metrics$rmse)}))
-    }
-    else if(param_selection == "best_aic"){
-      best_ind <- which.min(
-        sapply(res, function(x){return(x$train_metrics$aic)}))
-    }
-    else if(param_selection == "best_bic"){
-      best_ind <- best_ind <- which.min(
-        sapply(res, function(x){return(x$train_metrics$bic)}))
-    }
-    else{
-      stop("param_selection method unknown!")
-    }
-    res <- res[[best_ind]]
-    return(res)
+
+  # estimate parameter phi from AR model
+  phi <- arima(model$residuals,
+               order = c(ar, 0, 0),
+               include.mean = FALSE)$coef
+
+  # transform ts_input and ts_output
+  B <- function(ts, lag = 1){
+    l <- length(ts)
+    ts <- c( rep(NA, lag),
+             ts[1 : (l - lag)])
+    return(ts)
   }
+  ts_input <- as.vector(na.omit(sapply(0:ar, B, ts = ts_input) %*% c(1, -phi)))
+  ts_output <- as.vector(na.omit(sapply(0:ar, B, ts = ts_output) %*% c(1, -phi)))
+
+  # re-run model training
+  mod <- trainSWR(ts_input, ts_output, ...)
+  mod$phi <- phi
+
+  return(mod)
 }
