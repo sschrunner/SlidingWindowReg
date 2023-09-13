@@ -149,6 +149,12 @@ procedure to <tt>FALSE</tt>.</p>
 <span><span class="co">## <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
 <span><span class="co">## <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
 <span><span class="co">## <span style="color: #555555;">generated.</span></span></span></code></pre>
+<pre><code><span><span class="co">## Warning: The `return` argument of `trainSWR()` is deprecated as of SlidingWindowReg</span></span>
+<span><span class="co">## 0.1.1.</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Return argument is unused.</span></span>
+<span><span class="co">## <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">## <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
+<span><span class="co">## <span style="color: #555555;">generated.</span></span></span></code></pre>
 <p>%## Parallelization</p>
 <p>%Model parallelization is implemented between the model runs, while
 iterations (incrementally adding windows in each iterations) run in a
@@ -171,15 +177,15 @@ determine the predictive performance on test sets.</p>
 </h3>
 <p>A first overview on the model results can be obtained by printing a
 model summary:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## SlidingWindowReg (SWR) model object with k = 3 windows</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## | window| delta| sigma| beta|</span></span>
 <span><span class="co">## |------:|-----:|-----:|----:|</span></span>
-<span><span class="co">## |      1|  1.32|  0.15| 0.43|</span></span>
-<span><span class="co">## |      2|  1.91|  2.71| 0.35|</span></span>
-<span><span class="co">## |      3| 11.19|  3.20| 0.10|</span></span></code></pre>
+<span><span class="co">## |      1|  1.08|  0.30| 0.42|</span></span>
+<span><span class="co">## |      2|  2.08|  1.61| 0.27|</span></span>
+<span><span class="co">## |      3|  7.91|  4.37| 0.19|</span></span></code></pre>
 <p>In specific, the main model parameters are stored as:</p>
 <ul>
 <li>a matrix characterizing the location and size of the windows (column
@@ -187,42 +193,38 @@ model summary:</p>
 variance)</li>
 <li>a vector of regression coefficients</li>
 </ul>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># window parameters</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mod</span><span class="op">$</span><span class="va">param</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##          delta    sigma</span></span>
-<span><span class="co">## [1,]  1.323001 0.148855</span></span>
-<span><span class="co">## [2,]  1.913136 2.705538</span></span>
-<span><span class="co">## [3,] 11.186630 3.197777</span></span></code></pre>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">##         delta     sigma</span></span>
+<span><span class="co">## [1,] 1.077730 0.2971519</span></span>
+<span><span class="co">## [2,] 2.077316 1.6054138</span></span>
+<span><span class="co">## [3,] 7.909105 4.3734664</span></span></code></pre>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># regression parameters</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mod</span><span class="op">$</span><span class="va">mix</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 0.4264552 0.3469121 0.1039012</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 0.4233491 0.2669552 0.1864941</span></span></code></pre>
 <p>In order to visualize the estimated windows, a kernel plot is
 available in <tt>SlidingWindowReg</tt>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##                                                                       </span></span>
-<span><span class="co">## kernel1 0.0000000000 0.0000000000 0.0000000000 0.000000000 0.000000000</span></span>
-<span><span class="co">## kernel2 0.0000000000 0.0000000000 0.0000000000 0.000000000 0.000000000</span></span>
-<span><span class="co">## kernel3 0.0001210185 0.0002986937 0.0006690562 0.001360078 0.002509179</span></span>
-<span><span class="co">##                                                                               </span></span>
-<span><span class="co">## kernel1 0.000000000 0.000000000 0.000000000 0.00000000 0.00000000 0.0000000000</span></span>
-<span><span class="co">## kernel2 0.000000000 0.000000000 0.000000000 0.00000000 0.00000000 0.0002365553</span></span>
-<span><span class="co">## kernel3 0.004201155 0.006383756 0.008803511 0.01101815 0.01251513 0.0129013800</span></span>
-<span><span class="co">##                                                                     </span></span>
-<span><span class="co">## kernel1 0.0000000000 0.000000000 0.000000000 0.000000000 0.000000000</span></span>
-<span><span class="co">## kernel2 0.0007546554 0.002103138 0.005120336 0.010890524 0.020236022</span></span>
-<span><span class="co">## kernel3 0.0120701170 0.010248516 0.007897399 0.005523062 0.003505479</span></span>
-<span><span class="co">##                                           -3           -2           -1</span></span>
-<span><span class="co">## kernel1 0.000000000 0.000000000 5.621187e-16 0.0499830593 3.764722e-01</span></span>
-<span><span class="co">## kernel2 0.032849832 0.046588333 5.772453e-02 0.0624862928 5.909504e-02</span></span>
-<span><span class="co">## kernel3 0.002019226 0.001055578 5.007977e-04 0.0002156243 8.425472e-05</span></span>
-<span><span class="co">##                    0</span></span>
-<span><span class="co">## kernel1 6.872017e-09</span></span>
-<span><span class="co">## kernel2 4.882684e-02</span></span>
-<span><span class="co">## kernel3 0.000000e+00</span></span></code></pre>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">##                                                                      </span></span>
+<span><span class="co">## kernel1 0.000000e+00 0.00000000 0.0000000000 0.0000000000 0.000000000</span></span>
+<span><span class="co">## kernel2 0.000000e+00 0.00000000 0.0000000000 0.0000000000 0.000000000</span></span>
+<span><span class="co">## kernel3 9.945346e-05 0.00020178 0.0003886219 0.0007105059 0.001233104</span></span>
+<span><span class="co">##                                                                             </span></span>
+<span><span class="co">## kernel1 0.00000000 0.00000000 0.000000000 0.000000000 0.000000000 0.00000000</span></span>
+<span><span class="co">## kernel2 0.00000000 0.00000000 0.000000000 0.000000000 0.000000000 0.00000000</span></span>
+<span><span class="co">## kernel3 0.00203153 0.00317716 0.004716797 0.006647338 0.008892851 0.01129346</span></span>
+<span><span class="co">##                                                                             </span></span>
+<span><span class="co">## kernel1 0.00000000 0.00000000 0.00000000 0.00000000 0.0000000000 0.000000000</span></span>
+<span><span class="co">## kernel2 0.00000000 0.00000000 0.00000000 0.00000000 0.0007258121 0.003831396</span></span>
+<span><span class="co">## kernel3 0.01361464 0.01558038 0.01692557 0.01745426 0.0170864907 0.015878061</span></span>
+<span><span class="co">##                                         -3          -2          -1           0</span></span>
+<span><span class="co">## kernel1 0.00000000 0.00000000 3.595303e-07 0.032872746 0.379496862 0.010979161</span></span>
+<span><span class="co">## kernel2 0.01387404 0.03448232 5.884579e-02 0.068971317 0.055525039 0.030699507</span></span>
+<span><span class="co">## kernel3 0.01400668 0.01172913 9.323728e-03 0.007035681 0.005039824 0.003427024</span></span></code></pre>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mod</span>, include_text <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sampleExperiment_files/figure-html/evaluate_param_plot-1.png" width="480" style="display: block; margin: auto;"></p>
 </div>
@@ -232,14 +234,14 @@ available in <tt>SlidingWindowReg</tt>:</p>
 <p>To assess its predictive performance, we evaluate the model on the
 test set. For this purpose, we compute the root mean squared error
 (RMSE) and further evaluation metrics:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred_on_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">mod</span>, </span>
 <span>                        newdata <span class="op">=</span> <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">rain</span><span class="op">[</span><span class="op">-</span><span class="va">train_inds</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/eval_all.html">eval_all</a></span><span class="op">(</span><span class="va">pred_on_test</span>, </span>
 <span>               <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">gauge</span><span class="op">[</span><span class="op">-</span><span class="va">train_inds</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       rmse     nrmse        r2       nse       kge</span></span>
-<span><span class="co">## 1 3.353339 0.8898754 0.7244507 0.7244507 0.7457704</span></span></code></pre>
+<span><span class="co">## 1 3.347197 0.8882455 0.7254591 0.7254591 0.7477816</span></span></code></pre>
 <p>As a next step, we generate a plot demonstrating</p>
 <ul>
 <li>the input time series,</li>
@@ -248,7 +250,7 @@ test set. For this purpose, we compute the root mean squared error
 </ul>
 <p>The plot demonstrates the first 3 and last 3 hydrological years (in
 this case, years 1-3 and 7-9 are displayed).</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mod</span>, </span>
 <span>     type <span class="op">=</span> <span class="st">"prediction"</span>,</span>
 <span>     reference <span class="op">=</span> <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">gauge</span><span class="op">[</span><span class="op">-</span><span class="va">train_inds</span><span class="op">]</span>,</span>

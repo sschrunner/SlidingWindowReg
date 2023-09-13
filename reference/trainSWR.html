@@ -56,7 +56,7 @@
 <span>  log <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">parallel</span>,</span>
 <span>  return <span class="op">=</span> <span class="st">"best"</span>,</span>
-<span>  param_selection <span class="op">=</span> <span class="st">"best_aic"</span></span>
+<span>  param_selection <span class="op">=</span> <span class="st">"best_bic"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -87,7 +87,7 @@
 
 
 <dt>return</dt>
-<dd><p>either "best" (best model run is returned), or "all" (all model runs are returned)</p></dd>
+<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a> either "best" (best model run is returned), or "all" (all model runs are returned)</p></dd>
 
 
 <dt>param_selection</dt>
@@ -132,13 +132,16 @@ arXiv.org (preprint).
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The `parallel` argument of `trainSWR()` is deprecated as of SlidingWindowReg</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> 0.1.1.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Parallel model runs are not useful with deterministic window initializations.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The `return` argument of `trainSWR()` is deprecated as of SlidingWindowReg</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> 0.1.1.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Return argument is unused.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> SlidingWindowReg (SWR) model object with k = 2 windows</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> | window| delta| sigma| beta|</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> |------:|-----:|-----:|----:|</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> |      1|  0.67|  0.18| 0.66|</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> |      2|  3.64|  0.76| 0.23|</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |      1|  0.60|   0.1| 0.61|</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |      2|  3.27|   1.9| 0.30|</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
