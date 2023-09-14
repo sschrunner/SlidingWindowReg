@@ -17,6 +17,9 @@ cochrane_orcutt(model, ts_input, ts_output, ar = 1, ...)
 
 \item{...}{parameters for re-training the model using \link{trainSWR}}
 }
+\value{
+an object of type \code{SWR} model, see \link{createSWR}
+}
 \description{
 Cochrane-Orcutt procedure to resolve auto-correlated residuals in \code{SWR} models.
 }

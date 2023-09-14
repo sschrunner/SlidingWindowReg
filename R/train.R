@@ -195,6 +195,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' @param parallel `r lifecycle::badge("deprecated")` should the runs be computed in parallel? If FALSE, all runs are computed in serial. If TRUE, all runs are computed in parallel with a maximum number of cores. If a scalar is provided, the number of cores is set manually. No longer supported for single-run models
 #' @param return `r lifecycle::badge("deprecated")` either "best" (best model run is returned), or "all" (all model runs are returned)
 #' @param param_selection either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively
+#' @returns an object of type `SWR` model
 #' @examples
 #' # load the sample dataset and train a model based on one year of observations
 #' set.seed(42)
@@ -261,6 +262,7 @@ trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
 #' @param model an `SWR` model
 #' @param ar number of autoregressive lags
 #' @param ... parameters for re-training the model using \link{trainSWR}
+#' @returns an object of type `SWR` model, see \link{createSWR}
 #' @importFrom stats arima
 #' @importFrom stats na.omit
 #' @export
