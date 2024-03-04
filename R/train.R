@@ -35,8 +35,8 @@ error <- function(ts_input, ts_output, param, mix, log){
 }
 
 #' @describeIn train Core training process
+#' @import nloptr
 #' @import dplyr
-#' @import rgenoud
 #' @noRd
 train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bic"){
 
@@ -68,63 +68,77 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
   i = 1
   stop = FALSE
 
-  # compute mean of output/input for scaling purposes
-  mean_input    <- mean(ts_input, na.rm = T)
-  mean_output   <- mean(ts_output, na.rm = T)
+  while(!stop){
 
-  while(!stop) {
-
-    delta     <- param[,1]
-    delta_bic <- c()
-    param_    <- list()
-    mix_      <- list()
-
-    ## genetic optimization algorithm (genoud)
-    nInits    <- 200      # popuation size
-    inits     <- build_inits(nInits, i, mean_input, mean_output)
-
-    # range of parameters
-    ranges    <- matrix(rep(c(0,    50, # beta
-                              0,    100, #delta
-                              1/6,  50), i), ncol = 2, byrow = T)
-    res       <- genoud(fn  = function(x) {
-                                param_list <- decodeParam(x, intercept = FALSE)
-                                mix        <- param_list$mix
-                                param      <- param_list$param
-                                return(error(ts_input, ts_output, param, mix, log))
-                              },
-                        nvars                = i*3,
-                        max.generations      = 100,
-                        wait.generations     = 5,
-                        starting.values      = inits,
-                        boundary.enforcement = 2,
-                        BFGSburnin           = 5,
-                        pop.size             = nInits*i,
-                        gradient.check       = F,
-                        print.level          = 0,
-                        solution.tolerance   = 0.01,
-                        Domains              = ranges)
-    message   <- NA
-    res       <- res$par %>%
-      decodeParam(intercept = FALSE)
-    mix       <- res$mix
-    param     <- res$param
-
-    # reorder windows by delta
-    if(nrow(param) > 1){
-      o         <- order(param[,1])
-      param     <- param[o,]
-      mix       <- mix[o]
+    # heuristic initialization
+    if(i > 1){
+      delta_opts <- c(min(param[,1]) / 2,
+                      param[-nrow(param),1] + diff(param[,1]) / 2, # center point between kernels
+                      max(param[,1] + 1),
+                      max(param[,1] + 5),
+                      max(param[,1] + 10)
+                      )
+      mix_new <- sum(mix) * c(mix / (sum(mix) + 1), 1 / (sum(mix) + 1) )
+      sigma_new <- rep(1, i)
     }
-    r         <- createSWR(mix   = mix,
-                           param = param)
-    delta_bic <- c(delta_bic, BIC(r, ts_input = ts_input, ts_output = ts_output))
-    param_    <- append(param_, list(param))
-    mix_      <- append(mix_, list(mix))
+    else{
+      delta_opts = 1
+      mix_new = 1
+      sigma_new = 1
+    }
 
+    delta <- param[,1]
+    delta_bic <- c()
+    param_ <- list()
+    mix_ <- list()
+    for(delta_new in delta_opts){
+      param <- cbind(delta = c(delta, delta_new),
+                     sigma = sigma_new)
+      mix <- mix_new
 
-    param     <- param_[[which.min(delta_bic)]]
-    mix       <- mix_[[which.min(delta_bic)]]
+      # RUN OPTIMIZATION ALGORITHM
+      opts <- list("algorithm"="NLOPT_LN_BOBYQA",
+                   "xtol_rel" = 0,
+                   "ftol_rel" = 0,
+                   "xtol_abs" = 0,
+                   "ftol_abs" = 1e-3,
+                   "maxeval" = 1e4)
+
+      # perform optimization
+      res <- nloptr(
+              x0 = encodeParam(mix = mix, param = param),
+              eval_f = function(x){
+               param_list <- decodeParam(x, intercept = FALSE)
+               mix <- param_list$mix
+               param <- param_list$param
+               return(
+                 error(ts_input, ts_output, param, mix, log)
+               )},
+              lb = rep(0, length(mix) + length(param)),
+              opts = opts
+            )
+      message <- res$message
+      res <- res$solution %>%
+            decodeParam(intercept = FALSE)
+      mix <- res$mix
+      param <- res$param
+
+      # reorder windows by delta
+      if(nrow(param) > 1){
+        o <- order(param[,1])
+        param <- param[o,]
+        mix <- mix[o]
+      }
+
+      r <- createSWR(mix = mix,
+                     param = param)
+      delta_bic <- c(delta_bic, BIC(r, ts_input = ts_input, ts_output = ts_output))
+      param_ <- append(param_, list(param))
+      mix_ <- append(mix_, list(mix))
+    }
+
+    param <- param_[[which.min(delta_bic)]]
+    mix <- mix_[[which.min(delta_bic)]]
 
     # add parameter history entry
     param_hist <- append(param_hist, list(list(mix = mix, param = param)))
@@ -162,42 +176,12 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
                    param_hist = param_hist))
 }
 
-
-#' Build a initialization matrix for genoud
-#'
-#'
-#'
-#' @param nInits        population size for genetic algorithm
-#' @param nWin          number of windows to be used for SWR model
-#' @param mean_input    mean of input time series
-#' @param mean_output   mean of output time series
-#'
-#' @return a matrix where each row represent a member of pupulation and columns represent initial
-#'         parameter values of the model
-#' @noRd
-build_inits <- function(nInits, nWin, mean_input, mean_output) {
-  init0 <- data.frame(beta  = rep(mean_output/(nWin*mean_input), nInits),
-                      delta = rep(1:(nInits/4), 4),
-                      sigma = rep(c(1, 5, 10, 20), each = nInits/4))
-  n     <- nrow(init0)
-  inits <- init0
-  i     <- nWin
-  while (i > 1) {
-    inds  <- sample(1:n, n, replace = F)
-    inits <- cbind(inits, init0[inds,])
-    i     <- i - 1
-  }
-  return(as.matrix(inits))
-}
-
-
-
 #' @title Train model
 #' @description Trains an `SWR` model based on input and target time series data.
 #' @details
 #' The training procedure implements an iterative algorithm described in \insertCite{schrunner2023gaussian}{SlidingWindowReg}. A new window is added in each iteration, hence the number of windows equals to the iteration counter.
 #' Input and output time series are provided in `ts_input` and `ts_output`, respectively. Both are required to have equal lengths.
-#' The optimization is performed using the GENOUD algorithm \insertCite{mebanesekhon2011genoud}{SlidingWindowReg}, implemented in `rgenoud` \insertCite{rgenoud}{SlidingWindowReg}. As training hyperparameter, `iter` indicates the number of iterations, which equals to the maximum number of windows selected by the model.
+#' The optimization is performed using the BOBYQA algorithm \insertCite{powell2009bobyqa}{SlidingWindowReg}, implemented in `nloptr` \insertCite{nloptr}{SlidingWindowReg}. As training hyperparameter, `iter` indicates the number of iterations, which equals to the maximum number of windows selected by the model.
 #' Parameters `return` and `param_selection` indicate which criterion should be used to determine the number of windows; option are: `return="all"` (no hyperparameter selection) or `return="best"`, which allows one of the following options:
 #' - `param_selection="best_aic"`: select model with lowest AIC,
 #' - `param_selection="best_bic"`: select model with lowest BIC,
@@ -211,7 +195,6 @@ build_inits <- function(nInits, nWin, mean_input, mean_output) {
 #' @param parallel `r lifecycle::badge("deprecated")` should the runs be computed in parallel? If FALSE, all runs are computed in serial. If TRUE, all runs are computed in parallel with a maximum number of cores. If a scalar is provided, the number of cores is set manually. No longer supported for single-run models
 #' @param return `r lifecycle::badge("deprecated")` either "best" (best model run is returned), or "all" (all model runs are returned)
 #' @param param_selection either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively
-#' @returns an object of type `SWR` model
 #' @examples
 #' # load the sample dataset and train a model based on one year of observations
 #' set.seed(42)
@@ -278,7 +261,6 @@ trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
 #' @param model an `SWR` model
 #' @param ar number of autoregressive lags
 #' @param ... parameters for re-training the model using \link{trainSWR}
-#' @returns an object of type `SWR` model, see \link{createSWR}
 #' @importFrom stats arima
 #' @importFrom stats na.omit
 #' @export
