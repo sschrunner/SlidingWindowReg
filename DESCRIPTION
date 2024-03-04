@@ -20,7 +20,7 @@ Imports:
     knitr,
     lifecycle,
     methods,
-    nloptr,
+    rgenoud,
     parallel,
     pbapply,
     rdist,
