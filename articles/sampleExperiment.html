@@ -8,8 +8,8 @@
 <meta name="description" content="SlidingWindowReg">
 <title>Sample experiment using Sliding Window Regression • SlidingWindowReg</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Sample experiment using Sliding Window Regression">
 <meta property="og:description" content="SlidingWindowReg">
@@ -183,9 +183,9 @@ model summary:</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## | window| delta| sigma| beta|</span></span>
 <span><span class="co">## |------:|-----:|-----:|----:|</span></span>
-<span><span class="co">## |      1|  1.08|  0.30| 0.42|</span></span>
-<span><span class="co">## |      2|  2.08|  1.61| 0.27|</span></span>
-<span><span class="co">## |      3|  7.91|  4.37| 0.19|</span></span></code></pre>
+<span><span class="co">## |      1|  1.23|  0.20| 0.41|</span></span>
+<span><span class="co">## |      2|  2.08|  1.96| 0.31|</span></span>
+<span><span class="co">## |      3|  9.64|  4.51| 0.16|</span></span></code></pre>
 <p>In specific, the main model parameters are stored as:</p>
 <ul>
 <li>a matrix characterizing the location and size of the windows (column
@@ -197,33 +197,37 @@ variance)</li>
 <code class="sourceCode R"><span><span class="co"># window parameters</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mod</span><span class="op">$</span><span class="va">param</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         delta     sigma</span></span>
-<span><span class="co">## [1,] 1.077730 0.2971519</span></span>
-<span><span class="co">## [2,] 2.077316 1.6054138</span></span>
-<span><span class="co">## [3,] 7.909105 4.3734664</span></span></code></pre>
+<span><span class="co">## [1,] 1.227253 0.1996354</span></span>
+<span><span class="co">## [2,] 2.076937 1.9587665</span></span>
+<span><span class="co">## [3,] 9.637743 4.5139426</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># regression parameters</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mod</span><span class="op">$</span><span class="va">mix</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 0.4233491 0.2669552 0.1864941</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 0.4142523 0.3094873 0.1561027</span></span></code></pre>
 <p>In order to visualize the estimated windows, a kernel plot is
 available in <tt>SlidingWindowReg</tt>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##                                                                      </span></span>
-<span><span class="co">## kernel1 0.000000e+00 0.00000000 0.0000000000 0.0000000000 0.000000000</span></span>
-<span><span class="co">## kernel2 0.000000e+00 0.00000000 0.0000000000 0.0000000000 0.000000000</span></span>
-<span><span class="co">## kernel3 9.945346e-05 0.00020178 0.0003886219 0.0007105059 0.001233104</span></span>
-<span><span class="co">##                                                                             </span></span>
-<span><span class="co">## kernel1 0.00000000 0.00000000 0.000000000 0.000000000 0.000000000 0.00000000</span></span>
-<span><span class="co">## kernel2 0.00000000 0.00000000 0.000000000 0.000000000 0.000000000 0.00000000</span></span>
-<span><span class="co">## kernel3 0.00203153 0.00317716 0.004716797 0.006647338 0.008892851 0.01129346</span></span>
-<span><span class="co">##                                                                             </span></span>
-<span><span class="co">## kernel1 0.00000000 0.00000000 0.00000000 0.00000000 0.0000000000 0.000000000</span></span>
-<span><span class="co">## kernel2 0.00000000 0.00000000 0.00000000 0.00000000 0.0007258121 0.003831396</span></span>
-<span><span class="co">## kernel3 0.01361464 0.01558038 0.01692557 0.01745426 0.0170864907 0.015878061</span></span>
-<span><span class="co">##                                         -3          -2          -1           0</span></span>
-<span><span class="co">## kernel1 0.00000000 0.00000000 3.595303e-07 0.032872746 0.379496862 0.010979161</span></span>
-<span><span class="co">## kernel2 0.01387404 0.03448232 5.884579e-02 0.068971317 0.055525039 0.030699507</span></span>
-<span><span class="co">## kernel3 0.01400668 0.01172913 9.323728e-03 0.007035681 0.005039824 0.003427024</span></span></code></pre>
+<pre><code><span><span class="co">##                                                                       </span></span>
+<span><span class="co">## kernel1 0.000000e+00 0.0000000000 0.0000000000 0.0000000000 0.00000000</span></span>
+<span><span class="co">## kernel2 0.000000e+00 0.0000000000 0.0000000000 0.0000000000 0.00000000</span></span>
+<span><span class="co">## kernel3 9.018427e-05 0.0001775819 0.0003329947 0.0005946305 0.00101118</span></span>
+<span><span class="co">##                                                                               </span></span>
+<span><span class="co">## kernel1 0.000000000 0.000000000 0.00000000 0.000000000 0.000000000 0.000000000</span></span>
+<span><span class="co">## kernel2 0.000000000 0.000000000 0.00000000 0.000000000 0.000000000 0.000000000</span></span>
+<span><span class="co">## kernel3 0.001637499 0.002525256 0.00370853 0.005186452 0.006907344 0.008760406</span></span>
+<span><span class="co">##                                                                           </span></span>
+<span><span class="co">## kernel1 0.00000000 0.00000000 0.00000000 0.0000000 0.00000000 0.0000000000</span></span>
+<span><span class="co">## kernel2 0.00000000 0.00000000 0.00000000 0.0000000 0.00000000 0.0007842645</span></span>
+<span><span class="co">## kernel3 0.01058059 0.01216937 0.01332904 0.0139028 0.01380951 0.0130625202</span></span>
+<span><span class="co">##                                                                   -3</span></span>
+<span><span class="co">## kernel1 0.000000000 0.000000000 0.000000000 0.000000000 3.780855e-11</span></span>
+<span><span class="co">## kernel2 0.003129783 0.009674398 0.023166295 0.042979797 6.178533e-02</span></span>
+<span><span class="co">## kernel3 0.011766529 0.010093513 0.008245346 0.006414279 4.751811e-03</span></span>
+<span><span class="co">##                  -2          -1            0</span></span>
+<span><span class="co">## kernel1 0.035598519 0.378597904 5.583595e-05</span></span>
+<span><span class="co">## kernel2 0.068824419 0.059407692 3.973529e-02</span></span>
+<span><span class="co">## kernel3 0.003352298 0.002252155 1.440873e-03</span></span></code></pre>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mod</span>, include_text <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sampleExperiment_files/figure-html/evaluate_param_plot-1.png" width="480" style="display: block; margin: auto;"></p>
@@ -241,7 +245,7 @@ test set. For this purpose, we compute the root mean squared error
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/eval_all.html">eval_all</a></span><span class="op">(</span><span class="va">pred_on_test</span>, </span>
 <span>               <span class="va">sampleWatershed</span><span class="op">$</span><span class="va">gauge</span><span class="op">[</span><span class="op">-</span><span class="va">train_inds</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       rmse     nrmse        r2       nse       kge</span></span>
-<span><span class="co">## 1 3.347197 0.8882455 0.7254591 0.7254591 0.7477816</span></span></code></pre>
+<span><span class="co">## 1 3.347096 0.8882189 0.7254756 0.7254756 0.7442794</span></span></code></pre>
 <p>As a next step, we generate a plot demonstrating</p>
 <ul>
 <li>the input time series,</li>
