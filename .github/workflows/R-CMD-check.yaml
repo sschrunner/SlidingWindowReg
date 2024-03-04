@@ -68,8 +68,7 @@ jobs:
       - name: Install dependencies
         run: Rscript -e "library(remotes)" -e "update(readRDS('depends.Rds'))" -e "remotes::install_cran('rcmdcheck')"
       - name: Install dependencies
-          run: |
-            install.packages('rgenoud')
+        run: Rscript -e "install.packages('rgenoud')"
       - name: Check
         env:
           RGL_USE_NULL: TRUE
