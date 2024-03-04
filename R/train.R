@@ -196,7 +196,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' @param return `r lifecycle::badge("deprecated")` either "best" (best model run is returned), or "all" (all model runs are returned)
 #' @param param_selection either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively
 #' @examples
-#' # load the sample dataset and train a model based on one year of observations
+#' # train a model based on one year of observations
 #' set.seed(42)
 #' data(sampleWatershed)
 #' mod <- trainSWR(sampleWatershed$rain[1:365],

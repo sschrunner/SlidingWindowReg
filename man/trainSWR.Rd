@@ -48,7 +48,7 @@ Arguments \code{runs}, \code{parallel} are deprecated and should not be used.
 }
 }
 \examples{
-# load the sample dataset and train a model based on one year of observations
+# train a model based on one year of observations
 set.seed(42)
 data(sampleWatershed)
 mod <- trainSWR(sampleWatershed$rain[1:365],
