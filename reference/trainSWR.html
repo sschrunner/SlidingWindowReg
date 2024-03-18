@@ -56,7 +56,8 @@
 <span>  log <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">parallel</span>,</span>
 <span>  return <span class="op">=</span> <span class="st">"best"</span>,</span>
-<span>  param_selection <span class="op">=</span> <span class="st">"best_bic"</span></span>
+<span>  param_selection <span class="op">=</span> <span class="st">"best_bic"</span>,</span>
+<span>  algorithm <span class="op">=</span> <span class="st">"GENOUD"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -93,15 +94,28 @@
 <dt>param_selection</dt>
 <dd><p>either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively</p></dd>
 
+
+<dt>algorithm</dt>
+<dd><p>either "GENOUD" (genetic optimization using derivatives), or "BOBYQA" (bound optimization by quadratic approximation)</p></dd>
+
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
+
+<p>an object of type <code>SWR</code> model</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The training procedure implements an iterative algorithm described in (Schrunner et al. 2023)
 . A new window is added in each iteration, hence the number of windows equals to the iteration counter.
 Input and output time series are provided in <code>ts_input</code> and <code>ts_output</code>, respectively. Both are required to have equal lengths.
-The optimization is performed using the BOBYQA algorithm (Powell 2009)
+The optimization is performed using the GENOUD algorithm (Mebane Jr. and Sekhon 2011)
+, implemented in <code>rgenoud</code> (Mebane Jr. and Sekhon 2023)
+, or alternatively using the BOBYQA algorithm (Powell 2009)
 , implemented in <code>nloptr</code> (Johnson 2021)
-. As training hyperparameter, <code>iter</code> indicates the number of iterations, which equals to the maximum number of windows selected by the model.
+.
+As training hyperparameter, <code>iter</code> indicates the number of iterations, which equals to the maximum number of windows selected by the model.
 Parameters <code>return</code> and <code>param_selection</code> indicate which criterion should be used to determine the number of windows; option are: <code>return="all"</code> (no hyperparameter selection) or <code>return="best"</code>, which allows one of the following options:</p><ul><li><p><code>param_selection="best_aic"</code>: select model with lowest AIC,</p></li>
 <li><p><code>param_selection="best_bic"</code>: select model with lowest BIC,</p></li>
 <li><p><code>param_selection="best_rmse"</code>: select model with lowest RMSE.
@@ -111,7 +125,11 @@ Arguments <code>runs</code>, <code>parallel</code> are deprecated and should not
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Johnson SG (2021).
 <em>The NLopt nonlinear-optimization package</em>.
-v2.7.1, <a href="http://github.com/stevengj/nlopt" class="external-link">http://github.com/stevengj/nlopt</a>.<br><br> Powell MJ (2009).
+v2.7.1, <a href="http://github.com/stevengj/nlopt" class="external-link">http://github.com/stevengj/nlopt</a>.<br><br> Mebane Jr. W, Sekhon JS (2011).
+“Genetic Optimization Using Derivatives: The rgenoud package for R.”
+<em>Journal of Statistical Software, 42(11): 1-26.</em>, <b>42(11)</b>.<br><br> Mebane Jr. W, Sekhon JS (2023).
+<em>R Version of GENetic Optimization Using Derivatives</em>.
+v5.9-0.10, <a href="https://github.com/JasjeetSekhon/rgenoud" class="external-link">https://github.com/JasjeetSekhon/rgenoud</a>.<br><br> Powell MJ (2009).
 “The BOBYQA algorithm for bound constrained optimization without derivatives.”
 <em>Cambridge NA Report NA2009/06, University of Cambridge, Cambridge</em>, <b>26</b>.<br><br> Schrunner S, Janssen J, Jenul A, Cao J, Ameli AA, Welch WJ (2023).
 “A Gaussian Sliding Windows Regression Model for Hydrological Inference.”
@@ -140,8 +158,8 @@ arXiv.org (preprint).
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> | window| delta| sigma| beta|</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> |------:|-----:|-----:|----:|</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> |      1|  0.58|  0.09| 0.62|</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> |      2|  3.31|  1.93| 0.29|</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |      1|  0.17| 21.28| 0.36|</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> |      2|  0.86|  0.36| 0.67|</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
