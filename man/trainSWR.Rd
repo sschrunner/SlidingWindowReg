@@ -35,9 +35,6 @@ trainSWR(
 
 \item{algorithm}{either "GENOUD" (genetic optimization using derivatives), or "BOBYQA" (bound optimization by quadratic approximation)}
 }
-\value{
-an object of type \code{SWR} model
-}
 \description{
 Trains an \code{SWR} model based on input and target time series data.
 }
@@ -55,7 +52,7 @@ Arguments \code{runs}, \code{parallel} are deprecated and should not be used.
 }
 }
 \examples{
-# load the sample dataset and train a model based on one year of observations
+# train a model based on one year of observations
 set.seed(42)
 data(sampleWatershed)
 mod <- trainSWR(sampleWatershed$rain[1:365],

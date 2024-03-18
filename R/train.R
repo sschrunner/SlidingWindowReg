@@ -237,36 +237,6 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
                    param_hist = param_hist))
 }
 
-
-#' Build a initialization matrix for genoud
-#'
-#'
-#'
-#' @param nInits        population size for genetic algorithm
-#' @param nWin          number of windows to be used for SWR model
-#' @param mean_input    mean of input time series
-#' @param mean_output   mean of output time series
-#'
-#' @return a matrix where each row represent a member of pupulation and columns represent initial
-#'         parameter values of the model
-#' @noRd
-build_inits <- function(nInits, nWin, mean_input, mean_output) {
-  init0 <- data.frame(beta  = rep(mean_output/(nWin*mean_input), nInits),
-                      delta = rep(1:(nInits/4), 4),
-                      sigma = rep(c(1, 5, 10, 20), each = nInits/4))
-  n     <- nrow(init0)
-  inits <- init0
-  i     <- nWin
-  while (i > 1) {
-    inds  <- sample(1:n, n, replace = F)
-    inits <- cbind(inits, init0[inds,])
-    i     <- i - 1
-  }
-  return(as.matrix(inits))
-}
-
-
-
 #' @title Train model
 #' @description Trains an `SWR` model based on input and target time series data.
 #' @details
@@ -290,7 +260,7 @@ build_inits <- function(nInits, nWin, mean_input, mean_output) {
 #' @param algorithm either "GENOUD" (genetic optimization using derivatives), or "BOBYQA" (bound optimization by quadratic approximation)
 #' @returns an object of type `SWR` model
 #' @examples
-#' # load the sample dataset and train a model based on one year of observations
+#' # train a model based on one year of observations
 #' set.seed(42)
 #' data(sampleWatershed)
 #' mod <- trainSWR(sampleWatershed$rain[1:365],
@@ -357,7 +327,6 @@ trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
 #' @param model an `SWR` model
 #' @param ar number of autoregressive lags
 #' @param ... parameters for re-training the model using \link{trainSWR}
-#' @returns an object of type `SWR` model, see \link{createSWR}
 #' @importFrom stats arima
 #' @importFrom stats na.omit
 #' @export
