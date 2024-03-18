@@ -46,14 +46,15 @@ This version of the R package can be installed as follows:
 - ggplot2,
 - hydroGOF,
 - knitr,
+- lifecycle,
 - methods,
 - nloptr,
+- rgenoud,
 - parallel,
 - pbapply,
 - rdist,
 - Rdpack (>= 0.7),
-- stats,
-- lifecycle
+- stats
 
 ## Citation
 

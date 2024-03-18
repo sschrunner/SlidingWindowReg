@@ -12,7 +12,8 @@ trainSWR(
   log = FALSE,
   parallel,
   return = "best",
-  param_selection = "best_bic"
+  param_selection = "best_bic",
+  algorithm = "GENOUD"
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ trainSWR(
 \item{return}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} either "best" (best model run is returned), or "all" (all model runs are returned)}
 
 \item{param_selection}{either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively}
+
+\item{algorithm}{either "GENOUD" (genetic optimization using derivatives), or "BOBYQA" (bound optimization by quadratic approximation)}
 }
 \value{
 an object of type \code{SWR} model
@@ -41,7 +44,8 @@ Trains an \code{SWR} model based on input and target time series data.
 \details{
 The training procedure implements an iterative algorithm described in \insertCite{schrunner2023gaussian}{SlidingWindowReg}. A new window is added in each iteration, hence the number of windows equals to the iteration counter.
 Input and output time series are provided in \code{ts_input} and \code{ts_output}, respectively. Both are required to have equal lengths.
-The optimization is performed using the GENOUD algorithm \insertCite{mebanesekhon2011genoud}{SlidingWindowReg}, implemented in \code{rgenoud} \insertCite{rgenoud}{SlidingWindowReg}. As training hyperparameter, \code{iter} indicates the number of iterations, which equals to the maximum number of windows selected by the model.
+The optimization is performed using the GENOUD algorithm \insertCite{mebanesekhon2011genoud}{SlidingWindowReg}, implemented in \code{rgenoud} \insertCite{rgenoud}{SlidingWindowReg}, or alternatively using the BOBYQA algorithm \insertCite{powell2009bobyqa}{SlidingWindowReg}, implemented in \code{nloptr} \insertCite{nloptr}{SlidingWindowReg}.
+As training hyperparameter, \code{iter} indicates the number of iterations, which equals to the maximum number of windows selected by the model.
 Parameters \code{return} and \code{param_selection} indicate which criterion should be used to determine the number of windows; option are: \code{return="all"} (no hyperparameter selection) or \code{return="best"}, which allows one of the following options:
 \itemize{
 \item \code{param_selection="best_aic"}: select model with lowest AIC,

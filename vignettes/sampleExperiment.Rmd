@@ -53,6 +53,16 @@ mod <- trainSWR(sampleWatershed$rain[train_inds],
                 param_selection = "best_bic")
 ```
 
+The optimizer GENOUD (Genetic optimization using derivatives) is used by default. Alternatively, the package supports derivative-free optimization as well: the <tt>algorithm</tt> argument can be set to <tt>algorithm = "BOBYQA"</tt>.
+
+```{r execute1}
+mod_BOBYQA <- trainSWR(sampleWatershed$rain[train_inds],
+                sampleWatershed$gauge[train_inds],
+                iter = 3,
+                param_selection = "best_bic",
+                algorithm = "BOBYQA")
+```
+
 %## Parallelization
 
 %Model parallelization is implemented between the model runs, while iterations (incrementally adding windows in each iterations) run in a %serial order. Hence, the option <tt>parallel = FALSE</tt> should be chosen if <tt>runs = 1</tt>. In case of multiple model runs, %<tt>parallel</tt> can be set to either <tt>TRUE</tt> (in this case, the number of available kernels is determined automatically), or to a %positive integer number indicating the number of kernels to be used.
