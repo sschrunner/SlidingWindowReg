@@ -35,6 +35,9 @@ trainSWR(
 
 \item{algorithm}{either "GENOUD" (genetic optimization using derivatives), or "BOBYQA" (bound optimization by quadratic approximation)}
 }
+\value{
+an object of type \code{SWR} model
+}
 \description{
 Trains an \code{SWR} model based on input and target time series data.
 }

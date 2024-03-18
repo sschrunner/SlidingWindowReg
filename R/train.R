@@ -34,6 +34,33 @@ error <- function(ts_input, ts_output, param, mix, log){
   )
 }
 
+#' Build a initialization matrix for genoud
+#'
+#'
+#'
+#' @param nInits        population size for genetic algorithm
+#' @param nWin          number of windows to be used for SWR model
+#' @param mean_input    mean of input time series
+#' @param mean_output   mean of output time series
+#'
+#' @return a matrix where each row represent a member of pupulation and columns represent initial
+#'         parameter values of the model
+#' @noRd
+build_inits <- function(nInits, nWin, mean_input, mean_output) {
+  init0 <- data.frame(beta  = rep(mean_output/(nWin*mean_input), nInits),
+                      delta = rep(1:(nInits/4), 4),
+                      sigma = rep(c(1, 5, 10, 20), each = nInits/4))
+  n     <- nrow(init0)
+  inits <- init0
+  i     <- nWin
+  while (i > 1) {
+    inds  <- sample(1:n, n, replace = F)
+    inits <- cbind(inits, init0[inds,])
+    i     <- i - 1
+  }
+  return(as.matrix(inits))
+}
+
 #' @describeIn train Core training process
 #' @import dplyr
 #' @import nloptr
