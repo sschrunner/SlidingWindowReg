@@ -80,7 +80,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
     mix_      <- list()
 
     ## genetic optimization algorithm (genoud)
-    nInits    <- 200      # popuation size
+    nInits    <- 100      # popuation size
     inits     <- build_inits(nInits, i, mean_input, mean_output)
 
     # range of parameters
@@ -94,15 +94,15 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
                                 return(error(ts_input, ts_output, param, mix, log))
                               },
                         nvars                = i*3,
-                        max.generations      = 100,
+                        max.generations      = 50,
                         wait.generations     = 5,
                         starting.values      = inits,
                         boundary.enforcement = 2,
                         BFGSburnin           = 5,
-                        pop.size             = nInits*i,
+                        pop.size             = nInits,
                         gradient.check       = F,
                         print.level          = 0,
-                        solution.tolerance   = 0.01,
+                        solution.tolerance   = 0.1,
                         Domains              = ranges)
     message   <- NA
     res       <- res$par %>%
