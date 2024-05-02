@@ -13,7 +13,8 @@ trainSWR(
   parallel,
   return = "best",
   param_selection = "best_bic",
-  algorithm = "GENOUD"
+  algorithm = "GENOUD",
+  ...
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ trainSWR(
 \item{param_selection}{either "max" (maximum number of windows), or "best_rmse", "best_aic", or "best_bic" to optimize RMSE, AIC, or BIC, respectively}
 
 \item{algorithm}{either "GENOUD" (genetic optimization using derivatives), or "BOBYQA" (bound optimization by quadratic approximation)}
+}
+\value{
+an object of type \code{SWR} model
 }
 \description{
 Trains an \code{SWR} model based on input and target time series data.
