@@ -34,12 +34,40 @@ error <- function(ts_input, ts_output, param, mix, log){
   )
 }
 
+#' Build a initialization matrix for genoud
+#'
+#'
+#'
+#' @param nInits        population size for genetic algorithm
+#' @param nWin          number of windows to be used for SWR model
+#' @param mean_input    mean of input time series
+#' @param mean_output   mean of output time series
+#'
+#' @return a matrix where each row represent a member of pupulation and columns represent initial
+#'         parameter values of the model
+#' @noRd
+build_inits <- function(nInits, nWin, mean_input, mean_output) {
+  beta0  <- rep(mean_output/(nWin*mean_input), nInits)
+  delta0 <- rep(1:(nInits/4), 4)
+  sigma0 <- rep(c(1, 5, 10, 20), each = nInits/4)
+  beta <- delta <- sigma <- NULL
+  for (i in 1:nWin) {
+    inds   <- sample(1:nInits, nInits, replace = F)
+    beta   <- cbind(beta, beta0)
+    delta  <- cbind(delta, delta0[inds])
+    sigma  <- cbind(sigma, sigma0[inds])
+  }
+  return(cbind(beta, delta, sigma))
+}
+
+
+
 #' @describeIn train Core training process
 #' @import dplyr
 #' @import nloptr
 #' @import rgenoud
 #' @noRd
-train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bic", algorithm = "BOBYQA"){
+train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bic", algorithm = "BOBYQA", ...){
 
   # help function to compute model metrics to store training history
   append_hist <- function(train_hist, mix, param, operation_str, optim_str){
@@ -83,9 +111,28 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
       nInits    <- 100      # popuation size
       inits     <- build_inits(nInits, i, mean_input, mean_output)
       # range of parameters
-      ranges    <- matrix(rep(c(0,    50, # beta
-                                0,    100, #delta
-                                1/6,  50), i), ncol = 2, byrow = T)
+      ranges    <- matrix(c(rep(c(-50, 50), i), # beta
+                            rep(c(0, 100), i),  #delta
+                            rep(c(1/6,  50), i)), ncol = 2, byrow = T)
+      genoud_defaults <- list(fn                   = function(x) {
+                                  param_list <- decodeParam(x, intercept = FALSE)
+                                  mix        <- param_list$mix
+                                  param      <- param_list$param
+                                  return(error(ts_input, ts_output, param, mix, log))
+                                },
+                              nvars                = i*3,
+                              max.generations      = 100,
+                              wait.generations     = 20,
+                              hard.generation.limit = F,
+                              starting.values      = inits,
+                              boundary.enforcement = 2,
+                              BFGSburnin           = 20,
+                              pop.size             = nInits,
+                              gradient.check       = F,
+                              print.level          = 0,
+                              solution.tolerance   = 0.1,
+                              Domains              = ranges)
+      genoud_params <- modifyList(genoud_defaults, list(...))
     }
     else{
       # heuristic initialization
@@ -113,23 +160,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
     mix_      <- list()
 
     if(algorithm == "GENOUD"){
-      res       <- genoud(fn  = function(x) {
-                                  param_list <- decodeParam(x, intercept = FALSE)
-                                  mix        <- param_list$mix
-                                  param      <- param_list$param
-                                  return(error(ts_input, ts_output, param, mix, log))
-                                },
-                          nvars                = i*3,
-                          max.generations      = 50,
-                          wait.generations     = 5,
-                          starting.values      = inits,
-                          boundary.enforcement = 2,
-                          BFGSburnin           = 5,
-                          pop.size             = nInits,
-                          gradient.check       = F,
-                          print.level          = 0,
-                          solution.tolerance   = 0.1,
-                          Domains              = ranges)
+      res       <- do.call("genoud", genoud_params)
       message   <- NA
       res       <- res$par %>%
         decodeParam(intercept = FALSE)
@@ -274,7 +305,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
 #' @export
 trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
                   parallel, return = "best", param_selection = "best_bic",
-                  algorithm = "GENOUD"){
+                  algorithm = "GENOUD", ...){
 
   if(length(ts_input) != length(ts_output)){
     stop("Error: input and output must be vectors of the same lengths")
@@ -309,7 +340,7 @@ trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
                    iter = iter,
                    log = log,
                    param_selection = param_selection,
-                   algorithm = algorithm)
+                   algorithm = algorithm, ...)
 
   # add fitted & residuals to list objects
   res$fitted <- predict_target(ts_input, res$mix, res$param)
