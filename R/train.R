@@ -49,7 +49,7 @@ error <- function(ts_input, ts_output, param, mix, log){
 build_inits <- function(nInits, nWin, mean_input, mean_output) {
   beta0  <- rep(mean_output/(nWin*mean_input), nInits)
   delta0 <- rep(1:(nInits/4), 4)
-  sigma0 <- rep(c(1, 5, 10, 20), each = nInits/4)
+  sigma0 <- rep(c(1, 2, 3, 4), each = nInits/4)
   beta <- delta <- sigma <- NULL
   for (i in 1:nWin) {
     inds   <- sample(1:nInits, nInits, replace = F)
