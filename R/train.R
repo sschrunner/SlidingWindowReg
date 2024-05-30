@@ -111,9 +111,9 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
       nInits    <- 100      # popuation size
       inits     <- build_inits(nInits, i, mean_input, mean_output)
       # range of parameters
-      ranges    <- matrix(c(rep(c(-50, 50), i), # beta
-                            rep(c(0, 100), i),  #delta
-                            rep(c(1/6,  50), i)), ncol = 2, byrow = T)
+      ranges    <- matrix(c(rep(c(0.5, 10), i), # beta
+                            rep(c(0, 40), i),  #delta
+                            rep(c(1/6,  10), i)), ncol = 2, byrow = T)
       genoud_defaults <- list(fn                   = function(x) {
                                   param_list <- decodeParam(x, intercept = FALSE)
                                   mix        <- param_list$mix
@@ -122,11 +122,11 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bi
                                 },
                               nvars                = i*3,
                               max.generations      = 100,
-                              wait.generations     = 20,
-                              hard.generation.limit = F,
+                              wait.generations     = 10,
+                              hard.generation.limit = T,
                               starting.values      = inits,
                               boundary.enforcement = 2,
-                              BFGSburnin           = 20,
+                              BFGSburnin           = 10,
                               pop.size             = nInits,
                               gradient.check       = F,
                               print.level          = 0,
