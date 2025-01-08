@@ -3,7 +3,7 @@ Package: SlidingWindowReg
 Title: Gaussian Sliding Windows Regression
 Version: 0.1.1
 Authors@R: 
-    person("Stefan", "Schrunner", , "stefan.schrunner@nmbu.no", role = c("aut", "cre"),
+    person("Stefan", "Schrunner", , "s.schrunner@fh-kaernten.at", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-1327-4855"))
 Description: A Sliding Windows Regression model with parameterized
     Gaussian kernels as weights for hydrological inference. The package is
@@ -39,4 +39,4 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
