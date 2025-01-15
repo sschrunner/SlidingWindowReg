@@ -16,7 +16,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Stefan Schrunner \email{stefan.schrunner@nmbu.no} (\href{https://orcid.org/0000-0003-1327-4855}{ORCID})
+\strong{Maintainer}: Stefan Schrunner \email{s.schrunner@fh-kaernten.at} (\href{https://orcid.org/0000-0003-1327-4855}{ORCID})
 
 }
 \keyword{internal}
