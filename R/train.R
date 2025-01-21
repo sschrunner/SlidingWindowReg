@@ -66,7 +66,7 @@ build_inits <- function(nInits, nWin, mean_input, mean_output) {
 #' @import nloptr
 #' @import rgenoud
 #' @noRd
-train_inc <- function(ts_input, ts_output, iter, log, param_selection = "best_bic", algorithm = "BOBYQA"){
+train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm){
 
   # help function to compute model metrics to store training history
   append_hist <- function(train_hist, mix, param, operation_str, optim_str){
