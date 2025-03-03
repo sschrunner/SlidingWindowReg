@@ -29,8 +29,9 @@ decodeParam <- function(x, intercept = FALSE){
 
 #' @describeIn train Evaluate model error
 #' @noRd
-error <- function(ts_input, ts_output, param, mix, log){
-    return(-loglik(predict_target(ts_input, mix, param, log), ts_output)
+error <- function(ts_input, ts_output, param, mix, log, t_period){
+    if(is.null(t_period)){t_period = 1:length(ts_input)}
+    return(-loglik(predict_target(ts_input, mix, param, log), ts_output, t_period = t_period)
   )
 }
 
@@ -66,7 +67,7 @@ build_inits <- function(nInits, nWin, mean_input, mean_output) {
 #' @import nloptr
 #' @import rgenoud
 #' @noRd
-train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm){
+train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm, t_period = NULL){
 
   # help function to compute model metrics to store training history
   append_hist <- function(train_hist, mix, param, operation_str, optim_str){
@@ -77,10 +78,11 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm
                           operation = operation_str,
                           optimization = optim_str,
                           loglik = loglik(prediction = p,
-                                          reference = ts_output),
-                          aic = AIC(mod, ts_input = ts_input, ts_output = ts_output),
-                          bic = BIC(mod, ts_input = ts_input, ts_output = ts_output),
-                          eval_all(p, ts_output)
+                                          reference = ts_output,
+                                          t_period = t_period),
+                          aic = AIC(mod, ts_input = ts_input, ts_output = ts_output, t_period = t_period),
+                          bic = BIC(mod, ts_input = ts_input, ts_output = ts_output, t_period = t_period),
+                          eval_all(p, ts_output, t_period)
                         )
     )
     return(train_hist)
@@ -144,7 +146,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm
                                   param_list <- decodeParam(x, intercept = FALSE)
                                   mix        <- param_list$mix
                                   param      <- param_list$param
-                                  return(error(ts_input, ts_output, param, mix, log))
+                                  return(error(ts_input, ts_output, param, mix, log, t_period))
                                 },
                           nvars                = i*3,
                           max.generations      = 50,
@@ -172,7 +174,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm
       }
       r         <- createSWR(mix   = mix,
                              param = param)
-      delta_bic <- c(delta_bic, BIC(r, ts_input = ts_input, ts_output = ts_output))
+      delta_bic <- c(delta_bic, BIC(r, ts_input = ts_input, ts_output = ts_output, t_period = t_period))
       param_    <- append(param_, list(param))
       mix_      <- append(mix_, list(mix))
 
@@ -199,7 +201,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm
             mix <- param_list$mix
             param <- param_list$param
             return(
-              error(ts_input, ts_output, param, mix, log)
+              error(ts_input, ts_output, param, mix, log, t_period)
             )},
           lb = rep(0, length(mix) + length(param)),
           opts = opts
@@ -219,7 +221,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm
 
         r <- createSWR(mix = mix,
                        param = param)
-        delta_bic <- c(delta_bic, BIC(r, ts_input = ts_input, ts_output = ts_output))
+        delta_bic <- c(delta_bic, BIC(r, ts_input = ts_input, ts_output = ts_output, t_period = t_period))
         param_ <- append(param_, list(param))
         mix_ <- append(mix_, list(mix))
       }
@@ -301,7 +303,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm
 #' @export
 trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
                   parallel, return = "best", param_selection = "best_bic",
-                  algorithm = "GENOUD"){
+                  algorithm = "GENOUD", t_period = NULL){
 
   if(length(ts_input) != length(ts_output)){
     stop("Error: input and output must be vectors of the same lengths")
@@ -336,7 +338,8 @@ trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
                    iter = iter,
                    log = log,
                    param_selection = param_selection,
-                   algorithm = algorithm)
+                   algorithm = algorithm,
+                   t_period = t_period)
 
   # add fitted & residuals to list objects
   res$fitted <- predict_target(ts_input, res$mix, res$param)

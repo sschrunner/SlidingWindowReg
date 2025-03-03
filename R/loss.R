@@ -10,13 +10,16 @@
 #' @seealso \link[hydroGOF]{hydroGOF}
 #' @references \insertAllCited{}
 #' @export
-eval_all <- function(prediction, reference){
+eval_all <- function(prediction, reference, t_period = NULL){
+  if(is.null(t_period)){
+    t_period = 1:length(prediction)
+  }
   res <- data.frame(
-    rmse = rmse(prediction, reference),
-    nrmse = nrmse(prediction, reference),
-    r2 = r2(prediction, reference),
-    nse = nse(prediction, reference),
-    kge = kge(prediction, reference))
+    rmse = rmse(prediction[t_period], reference[t_period]),
+    nrmse = nrmse(prediction[t_period], reference[t_period]),
+    r2 = r2(prediction[t_period], reference[t_period]),
+    nse = nse(prediction[t_period], reference[t_period]),
+    kge = kge(prediction[t_period], reference[t_period]))
   return(res)
 }
 

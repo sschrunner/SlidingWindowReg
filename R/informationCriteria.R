@@ -8,14 +8,14 @@
 #' @importFrom stats AIC
 #' @importFrom methods is
 #' @export
-AIC.SWR <- function(object, ts_input, ts_output, ...){
+AIC.SWR <- function(object, ts_input, ts_output, t_period = NULL, ...){
 
   if(!is(object, "SWR")){
     stop("Wrong class of object")
   }
 
   lik <- loglik(predict(object, newdata = ts_input),
-                ts_output)
+                ts_output, t_period = t_period)
   return(-2 * lik + 6 * dim(object) ) # -2 * loglik + 2 k
 }
 
@@ -23,22 +23,28 @@ AIC.SWR <- function(object, ts_input, ts_output, ...){
 #' @importFrom stats BIC
 #' @importFrom methods is
 #' @export
-BIC.SWR <- function(object, ts_input, ts_output, ...){
+BIC.SWR <- function(object, ts_input, ts_output, t_period = NULL,...){
 
   if(!is(object, "SWR")){
     stop("Wrong class of object")
   }
 
   lik <- loglik(predict(object, newdata = ts_input),
-                ts_output)
+                ts_output, t_period = t_period)
   return(-2 * lik + log(length(ts_input)) * 3 * dim(object)) # -2 * loglik + k * log(n)
 }
 
 #' @describeIn AIC.SWR log-likelihood function
 #' @importFrom stats var
 #' @noRd
-loglik <- function(prediction, reference){
-  rss <- sum((reference - prediction)^2)
-  n <- length(prediction)
-  return(-n/2 * (log(2*pi) + log(rss/n) + 1))
+loglik <- function(prediction, reference, t_period = NULL){
+
+  if(is.null(t_period)){
+    t_period = 1:length(prediction)
+  }
+
+  rss <- sum((reference[t_period] - prediction[t_period])^2, na.rm = TRUE)
+  n <- length(t_period)
+  res <- -n/2 * (log(2*pi) + log(rss/n) + 1)
+  return(res)
 }
