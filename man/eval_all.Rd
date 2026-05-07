@@ -4,6 +4,7 @@
 \alias{eval_all}
 \alias{rmse}
 \alias{nrmse}
+\alias{mape}
 \alias{r2}
 \alias{nse}
 \alias{kge}
@@ -14,6 +15,8 @@ eval_all(prediction, reference)
 rmse(prediction, reference)
 
 nrmse(prediction, reference)
+
+mape(prediction, reference)
 
 r2(prediction, reference)
 
@@ -41,6 +44,8 @@ computes all evaluation metrics given a prediction and a reference vector. The f
 \item \code{rmse()}: Root Mean Squared Error
 
 \item \code{nrmse()}: Normalized Root Mean Squared Error
+
+\item \code{mape()}: Mean Absolute Percentage Error
 
 \item \code{r2()}: Coefficient of Determination
 

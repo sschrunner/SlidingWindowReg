@@ -14,6 +14,7 @@ eval_all <- function(prediction, reference){
   res <- data.frame(
     rmse = rmse(prediction, reference),
     nrmse = nrmse(prediction, reference),
+    mape = mape(prediction, reference),
     r2 = r2(prediction, reference),
     nse = nse(prediction, reference),
     kge = kge(prediction, reference))
@@ -35,6 +36,18 @@ rmse <- function(prediction, reference){
 #' @export
 nrmse <- function(prediction, reference){
   return(rmse(prediction, reference) / mean(reference, na.rm = TRUE))
+}
+
+#' @describeIn eval_all Mean Absolute Percentage Error
+#' @importFrom stats na.omit
+#' @export
+mape <- function(prediction, reference){
+  if(length(prediction) != length(reference)){
+    stop("Error in MAPE: prediction and reference must be vectors of the same length")
+  }
+  perc <- abs((prediction - reference) / reference)
+  perc <- perc[perc != Inf]
+  return(mean(perc, na.rm = TRUE))
 }
 
 #' @describeIn eval_all Coefficient of Determination
