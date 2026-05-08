@@ -157,7 +157,7 @@ train_inc <- function(ts_input, ts_output, iter, log, param_selection, algorithm
                           print.level          = 0,
                           solution.tolerance   = 0.1,
                           Domains              = ranges)
-      message   <- NA
+      message   <- ""
       res       <- res$par %>%
         decodeParam(intercept = FALSE)
 
@@ -304,7 +304,11 @@ trainSWR <- function(ts_input, ts_output, iter = 5, runs, log = FALSE,
                   algorithm = "GENOUD"){
 
   if(length(ts_input) != length(ts_output)){
-    stop("Error: input and output must be vectors of the same lengths")
+    stop("Error: input and output must be vectors of the same length")
+  }
+
+  if(all(is.na(ts_input)) || all(is.na(ts_output))){
+    stop("Error: input and output must contain non-NA values")
   }
 
   if (exists("runs")) {

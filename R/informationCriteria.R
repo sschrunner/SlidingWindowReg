@@ -38,7 +38,7 @@ BIC.SWR <- function(object, ts_input, ts_output, ...){
 #' @importFrom stats var
 #' @noRd
 loglik <- function(prediction, reference){
-  rss <- sum((reference - prediction)^2)
-  n <- length(prediction)
+  rss <- sum((reference - prediction)^2, na.rm = TRUE)
+  n <- length(na.omit(prediction))
   return(-n/2 * (log(2*pi) + log(rss/n) + 1))
 }
